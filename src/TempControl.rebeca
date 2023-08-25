@@ -2,7 +2,6 @@
 // Don't tell me what to do!
 
 env int desiredTemp = 22;
-env int queueSize = 5;
 
 reactiveclass Controller(5) {
     knownrebecs {  }
@@ -13,7 +12,7 @@ reactiveclass Controller(5) {
     }
 }
 
-reactiveclass Room(queueSize) {
+reactiveclass Room(5) {
     knownrebecs {  }
     statevars {  }
 
@@ -22,7 +21,7 @@ reactiveclass Room(queueSize) {
     }
 }
 
-reactiveclass Sensor(queueSize) {
+reactiveclass Sensor(5) {
     knownrebecs {  }
     statevars {  }
 
@@ -31,7 +30,7 @@ reactiveclass Sensor(queueSize) {
     }
 }
 
-reactiveclass HC_Unit(queueSize) {
+reactiveclass HC_Unit(5) {
     knownrebecs {  }
     statevars {  }
 
