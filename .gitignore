@@ -2,3 +2,5 @@
 *.h
 *.o
 *.spec
+.vscode
+.settings
