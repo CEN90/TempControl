@@ -1,2 +1,45 @@
 //Write your code here !
 // Don't tell me what to do!
+
+env int desiredTemp = 22;
+env int queueSize = 5;
+
+reactiveclass Controller(5) {
+    knownrebecs {  }
+    statevars {  }
+
+    Controller() {
+
+    }
+}
+
+reactiveclass Room(queueSize) {
+    knownrebecs {  }
+    statevars {  }
+
+    Room() {
+
+    }
+}
+
+reactiveclass Sensor(queueSize) {
+    knownrebecs {  }
+    statevars {  }
+
+    Sensor() {
+
+    }
+}
+
+reactiveclass HC_Unit(queueSize) {
+    knownrebecs {  }
+    statevars {  }
+
+    HC_Unit() {
+        
+    }
+}
+
+main {
+    
+}
