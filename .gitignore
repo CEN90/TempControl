@@ -4,3 +4,6 @@
 *.spec
 .vscode
 .settings
+*.exe
+*.xml
+out/*

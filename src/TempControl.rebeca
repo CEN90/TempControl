@@ -2,14 +2,14 @@
 // Don't tell me what to do!
 
 // Temperature constants
-env int desiredTemp = 22;
-env int threshold_low = 21;
-env int threshold_high = 23;
+env int desiredTemp_const = 22;
+env int threshold_low_const = 21;
+env int threshold_high_const = 23;
 
 // Polling constants
-env int sensorPoll = 2;
-env int tickValue = 10;
-env int regulationPoll = 5;
+env int sensorPoll_const = 2;
+env int tickPoll_const = 10;
+env int regulationPoll_const = 5;
 
 reactiveclass Room(5) {
     knownrebecs { Sensor sensor; }
@@ -18,17 +18,19 @@ reactiveclass Room(5) {
         int currentTemp;
         int currentRegulation;
         int outside_air;
+        int tickValue;
      }
 
     Room() {
-        temperatue = desiredTemp;
+        currentTemp = desiredTemp_const;
         currentRegulation = 0;
         outside_air = 0;
+        tickValue = tickPoll_const;
     }
 
     msgsrv updateStatus() {
         outside_air = ?(1, 0, -1);
-        temperatue = temperatue - outside_air + currentRegulation;
+        currentTemp = currentTemp - outside_air + currentRegulation;
         self.updateStatus() after(tickValue);
     }
 
@@ -46,7 +48,10 @@ reactiveclass Controller(5) {
     knownrebecs { HC_Unit hc_unit; }
 
     statevars { 
-        int currentValue;
+        int currentTemp;
+        int desiredTemp;
+        int threshold_low;
+        int threshold_high;
         boolean isHeating;
         boolean isCooling;
      }
@@ -54,11 +59,13 @@ reactiveclass Controller(5) {
     Controller() {
         isCooling = false;
         isHeating = false;
-        currentValue = desiredTemp; // Start off with desired
+        threshold_low = threshold_low_const;
+        threshold_high = threshold_high_const;
+        currentTemp = desiredTemp_const; // Start off with desired
     }
 
     msgsrv setCurrent(int value) {
-        currentValue = value;
+        currentTemp = value;
         self.updateOutput();
     }
 
@@ -93,7 +100,7 @@ reactiveclass Sensor(5) {
 
     msgsrv callSensor() {
         room.getTemp();
-        self.callSensor() after(sensorPoll);
+        self.callSensor() after(sensorPoll_const);
     }
 
     msgsrv setCurrent(int value) {
@@ -137,7 +144,7 @@ reactiveclass HC_Unit(5) {
 
     msgsrv regulateTemp() {
         room.setRegulation(currentRegulation);
-        self.regulateTemp() after(regulationPoll);
+        self.regulateTemp() after(regulationPoll_const);
     }
 
 }

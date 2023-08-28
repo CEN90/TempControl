@@ -1,4 +1,32 @@
-property { 
-    
+property {
+	define {
+		/*
+		temp_20 = room.temperature == 20;
+		temp_21 = room.temperature == 21;
+		temp_22 = room.temperature == 22;
+		temp_23 = room.temperature == 23;
+		temp_24 = room.temperature == 24;
+		temp_25 = room.temperature == 25;
+		temp_19 = room.temperature == 19;
+		temp_18 = room.temperature == 18;
+		*/
+	
+		
+		s_20 = controller.currentTemp == 20;
+		s_21 = controller.currentTemp == 21;
+		s_22 = controller.currentTemp == 22;
+		s_23 = controller.currentTemp == 23;
+		s_24 = controller.currentTemp == 24;
+		w_false = room.outside_air == 0;
+		w_true = room.outside_air == 1;
+		
+		//heater_On = heater.heater_On == true;
+		//cooler_On = cooler.cooler_On == true;
+		h_true = hc_unit.heaterOn == true;
+		h_false = hc_unit.heaterOn == false;
+		c_true = hc_unit.coolerOn == true;
+		c_false = hc_unit.coolerOn == false;
+		
+	}
 
 }
