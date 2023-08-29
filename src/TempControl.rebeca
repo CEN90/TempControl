@@ -49,9 +49,6 @@ reactiveclass Controller(5) {
 
     statevars { 
         int currentTemp;
-        int desiredTemp;
-        int threshold_low;
-        int threshold_high;
         boolean isHeating;
         boolean isCooling;
      }
@@ -59,8 +56,6 @@ reactiveclass Controller(5) {
     Controller() {
         isCooling = false;
         isHeating = false;
-        threshold_low = threshold_low_const;
-        threshold_high = threshold_high_const;
         currentTemp = desiredTemp_const; // Start off with desired
     }
 
@@ -70,17 +65,17 @@ reactiveclass Controller(5) {
     }
 
     msgsrv updateOutput() {
-        if (currentTemp >= threshold_low && currentTemp <= threshold_high) {
+        if (currentTemp >= threshold_low_const && currentTemp <= threshold_low_const) {
             hc_unit.switchoff();
             isCooling = false;
             isHeating = false;
         }
-        else if (currentTemp < threshold_low) {
+        else if (currentTemp < threshold_low_const) {
             hc_unit.setHeating();
             isHeating = true;
             isCooling = false;
         }
-        else if (currentTemp > threshold_high) {
+        else if (currentTemp > threshold_high_const) {
             hc_unit.setCooling();
             isCooling = true;
             isHeating = false;
