@@ -18,24 +18,21 @@ reactiveclass Room(5) {
         int currentTemp;
         int currentRegulation;
         int outside_air;
-        int tickValue;
      }
 
     Room() {
         currentTemp = desiredTemp_const;
         currentRegulation = 0;
         outside_air = 0;
-        tickValue = tickPoll_const;
     }
 
     msgsrv updateStatus() {
         outside_air = ?(1, 0, -1);
         currentTemp = currentTemp - outside_air + currentRegulation;
-        self.updateStatus() after(tickValue);
+        self.updateStatus() after(tickPoll_const);
     }
 
     msgsrv setRegulation(int value) {
-        // sensor.setCurrent(currentTemp);
         currentRegulation = value;
     }
 
@@ -51,7 +48,7 @@ reactiveclass Controller(5) {
         int currentTemp;
         boolean isHeating;
         boolean isCooling;
-     }
+    }
 
     Controller() {
         isCooling = false;
@@ -65,7 +62,7 @@ reactiveclass Controller(5) {
     }
 
     msgsrv updateOutput() {
-        if (currentTemp >= threshold_low_const && currentTemp <= threshold_low_const) {
+        if (currentTemp >= threshold_low_const && currentTemp <= threshold_high_const) {
             hc_unit.switchoff();
             isCooling = false;
             isHeating = false;
