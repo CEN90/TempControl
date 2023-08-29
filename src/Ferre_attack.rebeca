@@ -11,7 +11,7 @@ env int cAmalMsg = 1; //1:activateh, -1:activatec, 0:switchoff
 env int desiredValue = 22; //initial value for the temperature
 reactiveclass Controller(5){
 	knownrebecs{
-            HC_Unit hc_unit;
+        HC_Unit hc_unit;
 	}
 	statevars{
 		int sensedValue; 

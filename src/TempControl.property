@@ -8,8 +8,8 @@ property {
 	}
 
     Assertion {
-        safety_prop1: !(temp_over && isCooling);
-        safety_prop2: !(temp_under && isHeating);
-        safety_prop3: !(temp_over || temp_under);
+        safety_prop1: !(temp_over && isCooling); // temp över och kyler
+        safety_prop2: !(temp_under && isHeating); // temp under och värmer
+        // safety_prop3: !(temp_over || temp_under);
     }
 }

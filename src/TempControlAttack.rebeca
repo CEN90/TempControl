@@ -12,14 +12,14 @@ env int tickPoll_const = 10;
 env int regulationPoll_const = 5;
 
 // MitM-Attack on Sensor
-env boolean attack_sensor = true;
-env int sensor_attack_wait = 5;
-env int sensor_inj_value_const = 24;
+env boolean attack_sensor = false;
+env int sensor_attack_wait = 10;
+env int sensor_inj_value_const = 35;
 
 // Fabrication attack on Controller
 env boolean attack_controller = true;
 env int controller_attack_wait_const = 10;
-env int controller_attack_func_const = 1; // 1: switchoff, 2: setCooling, 3: setHeating
+env int controller_attack_func_const = -1; // 0: switchoff, -1: setCooling, 1: setHeating
 
 
 reactiveclass Controller(5) {
@@ -71,11 +71,11 @@ reactiveclass Controller(5) {
     }
 
     msgsrv compromise(int controller_attack_func) {
-        if (controller_attack_func == 1) {
+        if (controller_attack_func == 0) {
             hc_unit.switchoff();
-        } else if (controller_attack_func == 2) {
+        } else if (controller_attack_func == -1) {
             hc_unit.setCooling();
-        } else if (controller_attack_func == 3) {
+        } else if (controller_attack_func == 1) {
             hc_unit.setHeating();
         }
     }
@@ -91,7 +91,8 @@ reactiveclass Sensor(5) {
 		if (compromised) {
 			self.setCurrent(msg) after(compTime);
 		}
-		self.callSensor();
+
+        self.callSensor();		
 	}
 
     msgsrv callSensor() {
