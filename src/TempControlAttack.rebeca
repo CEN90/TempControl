@@ -14,7 +14,7 @@ env int regulationPoll_const = 5;
 // MitM-Attack on Sensor
 env boolean attack_sensor = true;
 env int sensor_attack_wait = 5;
-env int sensor_inj_value = 24;
+env int sensor_inj_value_const = 24;
 
 // Fabrication attack on Controller
 env boolean attack_controller = true;
@@ -87,9 +87,12 @@ reactiveclass Sensor(5) {
         Controller controller;
     }
 
-    Sensor() {
-        self.callSensor();
-    }
+    Sensor(boolean compromised, int compTime, int msg){
+		if (compromised) {
+			self.setCurrent(msg) after(compTime);
+		}
+		self.callSensor();
+	}
 
     msgsrv callSensor() {
         room.getTemp();
@@ -175,6 +178,6 @@ reactiveclass HC_Unit(5) {
 main {
     Room room(sensor): ();
     Controller controller(hc_unit): (controller_attack_wait_const, controller_attack_func_const);
-    Sensor sensor(room, controller): ();
+    Sensor sensor(room, controller): (attack_sensor, sensor_attack_wait, sensor_inj_value_const);
     HC_Unit hc_unit(room): ();
 }
