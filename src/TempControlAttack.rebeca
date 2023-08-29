@@ -11,6 +11,16 @@ env int sensorPoll_const = 2;
 env int tickPoll_const = 10;
 env int regulationPoll_const = 5;
 
+// MitM-Attack on Sensor
+env boolean attack_sensor = true;
+env int sensor_attack_wait = 5;
+env int sensor_inj_value = 24;
+
+// Fabrication attack on Controller
+env boolean attack_controller = true;
+env int controller_attack_wait_const = 10;
+env int controller_attack_func_const = 1; // 1: switchoff, 2: setCooling, 3: setHeating
+
 
 reactiveclass Controller(5) {
     knownrebecs { HC_Unit hc_unit; }
@@ -21,10 +31,14 @@ reactiveclass Controller(5) {
         boolean isCooling;
     }
 
-    Controller() {
+    Controller(int controller_attack_wait, int controller_attack_func) {
         isCooling = false;
         isHeating = false;
         currentTemp = desiredTemp_const; // Start off with desired
+
+        if (attack_controller) {
+            self.compromise(controller_attack_func) after(controller_attack_wait);
+        }
     }
 
     msgsrv setCurrent(int value) {
@@ -53,6 +67,16 @@ reactiveclass Controller(5) {
                 isCooling = true;
                 isHeating = false;
             }
+        }
+    }
+
+    msgsrv compromise(int controller_attack_func) {
+        if (controller_attack_func == 1) {
+            hc_unit.switchoff();
+        } else if (controller_attack_func == 2) {
+            hc_unit.setCooling();
+        } else if (controller_attack_func == 3) {
+            hc_unit.setHeating();
         }
     }
 }
@@ -150,7 +174,7 @@ reactiveclass HC_Unit(5) {
 
 main {
     Room room(sensor): ();
-    Controller controller(hc_unit): ();
+    Controller controller(hc_unit): (controller_attack_wait_const, controller_attack_func_const);
     Sensor sensor(room, controller): ();
     HC_Unit hc_unit(room): ();
 }
