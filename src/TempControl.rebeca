@@ -1,4 +1,4 @@
-//Write your code here !
+// Write your code here !
 // Don't tell me what to do!
 
 // Temperature constants
@@ -11,35 +11,6 @@ env int sensorPoll_const = 2;
 env int tickPoll_const = 10;
 env int regulationPoll_const = 5;
 
-reactiveclass Room(5) {
-    knownrebecs { Sensor sensor; }
-
-    statevars { 
-        int currentTemp;
-        int currentRegulation;
-        int outside_air;
-     }
-
-    Room() {
-        currentTemp = desiredTemp_const;
-        currentRegulation = 0;
-        outside_air = 0;
-    }
-
-    msgsrv updateStatus() {
-        outside_air = ?(1, 0, -1);
-        currentTemp = currentTemp - outside_air + currentRegulation;
-        self.updateStatus() after(tickPoll_const);
-    }
-
-    msgsrv setRegulation(int value) {
-        currentRegulation = value;
-    }
-
-    msgsrv getTemp() {
-        sensor.setCurrent(currentTemp);
-    }
-}
 
 reactiveclass Controller(5) {
     knownrebecs { HC_Unit hc_unit; }
@@ -87,7 +58,7 @@ reactiveclass Sensor(5) {
     }
 
     Sensor() {
-        callSensor();
+        self.callSensor();
     }
 
     msgsrv callSensor() {
@@ -97,6 +68,37 @@ reactiveclass Sensor(5) {
 
     msgsrv setCurrent(int value) {
         controller.setCurrent(value);
+    }
+}
+
+reactiveclass Room(5) {
+    knownrebecs { Sensor sensor; }
+
+    statevars { 
+        int currentTemp;
+        int currentRegulation;
+        int outside_air;
+     }
+
+    Room() {
+        currentTemp = desiredTemp_const;
+        currentRegulation = 0;
+        outside_air = 0;
+        self.updateStatus();
+    }
+
+    msgsrv updateStatus() {
+        outside_air = ?(1, 0, -1);
+        currentTemp = currentTemp - outside_air + currentRegulation;
+        self.updateStatus() after(tickPoll_const);
+    }
+
+    msgsrv setRegulation(int value) {
+        currentRegulation = value;
+    }
+
+    msgsrv getTemp() {
+        sensor.setCurrent(currentTemp);
     }
 }
 
@@ -117,13 +119,13 @@ reactiveclass HC_Unit(5) {
     }
 
     msgsrv setCooling() {
-        currentRegulation = 1;
+        currentRegulation = -1;
         heaterOn = false;
         coolerOn = true;
     }
 
     msgsrv setHeating() {
-        currentRegulation = -1;
+        currentRegulation = 1;
         heaterOn = true;
         coolerOn = false;
     }
@@ -138,7 +140,6 @@ reactiveclass HC_Unit(5) {
         room.setRegulation(currentRegulation);
         self.regulateTemp() after(regulationPoll_const);
     }
-
 }
 
 main {
