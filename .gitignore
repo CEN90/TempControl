@@ -6,4 +6,11 @@
 .settings
 *.exe
 *.xml
+
+bin/*
+lib/*
 out/*
+share/*
+build/*
+include/*
+src-gen/*
