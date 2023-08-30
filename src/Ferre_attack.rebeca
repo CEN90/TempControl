@@ -4,7 +4,7 @@ env int sAComp_time = 5; // 0,1,2,3,...,25
 env int sAmalMsg = 24; //19,20,21,22,23,24,25
 
 //attack on controller
-env boolean cAComp = false;
+env boolean cAComp = true;
 env int cAComp_time = 10; // 0,1,2,3,...,25
 env int cAmalMsg = 1; //1:activateh, -1:activatec, 0:switchoff
 
