@@ -76,7 +76,7 @@ reactor HC_Unit {
         //std::cout << "The UC_Unit is SWITCHED OFF"<< "\n";
      =}
 }
-main reactor RoomTemp {  
+main reactor Ferre_Temperature_Control_System {  
 	room = new Room();
 	sensor = new Sensor(); 
 	unit = new HC_Unit();
