@@ -80,19 +80,6 @@ reactor HC_Unit {
      =}
 }
 
-reactor din_mamma {
-    output sense:int;
-    output out:int;
-    input sensedValue:int;
-    timer start(0, 1 sec);
-
-    reaction(start) -> sense{= sense.set(1); =}	
-    reaction(sensedValue) -> out {=
-        out.set(sensedValue.get());
-        std::cout << "The 'sensedValue' is:" << *sensedValue.get() << "\n"; 
-    =}
-}
-
 main reactor Ferre_Temperature_Control_System {  
 	room = new Room();
 	sensor = new Sensor(); 
