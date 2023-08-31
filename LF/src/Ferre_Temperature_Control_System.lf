@@ -86,35 +86,32 @@ reactor din_mamma {
     input sensedValue:int;
     timer start(0, 1 sec);
 
-    reaction(start) -> sense {=  =}
-    // reaction(start) -> sense{= sense.set(1); =}	
-    // reaction(sensedValue) -> out {=
-    //     out.set(sensedValue.get());
-    //     std::cout << "The 'sensedValue' is:" << *sensedValue.get() << "\n"; 
-    // =}
+    reaction(start) -> sense{= sense.set(1); =}	
+    reaction(sensedValue) -> out {=
+        out.set(sensedValue.get());
+        std::cout << "The 'sensedValue' is:" << *sensedValue.get() << "\n"; 
+    =}
 }
 
 main reactor Ferre_Temperature_Control_System {  
-    mamma = new din_mamma();
-
-	// room = new Room();
-	// sensor = new Sensor(); 
-	// unit = new HC_Unit();
-	// controller = new Controller();
-	// //monitor = new Monitoring_Mitigation();
-	// room.sensedValue -> sensor.sensedValue;
-	// sensor.sense -> room.status after 1 sec;
-	// sensor.out -> controller.getSense;
-	// unit.heating -> room.heating;
-	// unit.cooling -> room.cooling;  
-	// controller.activate_h -> unit.activate_h;
-	// controller.activate_c -> unit.activate_c;
-	// controller.switchoff -> unit.switchoff;
-	// //controller.activate_h -> monitor.activate_h;
-	// //controller.activate_c -> monitor.activate_c;
-	// //monitor.cmdHeat -> unit.activate_h;
-	// //monitor.cmdCool -> unit.activate_c;
-	// //sensor.out -> monitor.sensedData;
+	room = new Room();
+	sensor = new Sensor(); 
+	unit = new HC_Unit();
+	controller = new Controller();
+	//monitor = new Monitoring_Mitigation();
+	room.sensedValue -> sensor.sensedValue;
+	sensor.sense -> room.status after 1 sec;
+	sensor.out -> controller.getSense;
+	unit.heating -> room.heating;
+	unit.cooling -> room.cooling;  
+	controller.activate_h -> unit.activate_h;
+	controller.activate_c -> unit.activate_c;
+	controller.switchoff -> unit.switchoff;
+	//controller.activate_h -> monitor.activate_h;
+	//controller.activate_c -> monitor.activate_c;
+	//monitor.cmdHeat -> unit.activate_h;
+	//monitor.cmdCool -> unit.activate_c;
+	//sensor.out -> monitor.sensedData;
 	
 	
 }
