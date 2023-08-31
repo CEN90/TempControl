@@ -1,0 +1,26 @@
+target Cpp;
+
+reactor Controller {
+
+}
+
+reactor Sensor {
+
+}
+
+reactor Room {
+
+}
+
+reactor HC_Unit {
+
+}
+
+main reactor {
+    controller = new Controller();
+    sensor = new Sensor();
+    room = new Room();
+    hc_unit = new HC_Unit();
+
+    
+}
