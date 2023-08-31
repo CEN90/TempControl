@@ -6,11 +6,16 @@
 .settings
 *.exe
 *.xml
+*.json
+progress
 
-bin/*
-lib/*
-out/*
-share/*
-build/*
-include/*
-src-gen/*
+LF/bin/*
+LF/lib/*
+LF/out/*
+LF/share/*
+LF/build/*
+LF/include/*
+LF/src-gen/*
+.project
+CMakeLists.txt
+.lf-cpp-marker

@@ -1,4 +1,4 @@
-target Cpp {fast: false, threads: 1};   
+target Cpp;   
 //import Monitor.lf;   
 reactor Controller { 
     input getSense:int;  
@@ -26,6 +26,7 @@ reactor Controller {
         }
     =}	
 }
+
 reactor Room {
     output sensedValue:int;
     input cooling:int;
@@ -47,6 +48,7 @@ reactor Room {
     reaction(heating) {= temperature = temperature + 1; =}
     reaction(cooling) {= temperature = temperature - 1; =}
 }
+
 reactor Sensor { 
     output sense:int;
     output out:int;
@@ -58,6 +60,7 @@ reactor Sensor {
         std::cout << "The 'sensedValue' is:" << *sensedValue.get() << "\n"; 
     =}
 }
+
 reactor HC_Unit {
     input activate_h:int;
     input activate_c:int;
@@ -76,25 +79,42 @@ reactor HC_Unit {
         //std::cout << "The UC_Unit is SWITCHED OFF"<< "\n";
      =}
 }
+
+reactor din_mamma {
+    output sense:int;
+    output out:int;
+    input sensedValue:int;
+    timer start(0, 1 sec);
+
+    reaction(start) -> sense {=  =}
+    // reaction(start) -> sense{= sense.set(1); =}	
+    // reaction(sensedValue) -> out {=
+    //     out.set(sensedValue.get());
+    //     std::cout << "The 'sensedValue' is:" << *sensedValue.get() << "\n"; 
+    // =}
+}
+
 main reactor Ferre_Temperature_Control_System {  
-	room = new Room();
-	sensor = new Sensor(); 
-	unit = new HC_Unit();
-	controller = new Controller();
-	//monitor = new Monitoring_Mitigation();
-	room.sensedValue -> sensor.sensedValue;
-	sensor.sense -> room.status after 1 sec;
-	sensor.out -> controller.getSense;
-	unit.heating -> room.heating;
-	unit.cooling -> room.cooling;  
-	controller.activate_h -> unit.activate_h;
-	controller.activate_c -> unit.activate_c;
-	controller.switchoff -> unit.switchoff;
-	//controller.activate_h -> monitor.activate_h;
-	//controller.activate_c -> monitor.activate_c;
-	//monitor.cmdHeat -> unit.activate_h;
-	//monitor.cmdCool -> unit.activate_c;
-	//sensor.out -> monitor.sensedData;
+    mamma = new din_mamma();
+
+	// room = new Room();
+	// sensor = new Sensor(); 
+	// unit = new HC_Unit();
+	// controller = new Controller();
+	// //monitor = new Monitoring_Mitigation();
+	// room.sensedValue -> sensor.sensedValue;
+	// sensor.sense -> room.status after 1 sec;
+	// sensor.out -> controller.getSense;
+	// unit.heating -> room.heating;
+	// unit.cooling -> room.cooling;  
+	// controller.activate_h -> unit.activate_h;
+	// controller.activate_c -> unit.activate_c;
+	// controller.switchoff -> unit.switchoff;
+	// //controller.activate_h -> monitor.activate_h;
+	// //controller.activate_c -> monitor.activate_c;
+	// //monitor.cmdHeat -> unit.activate_h;
+	// //monitor.cmdCool -> unit.activate_c;
+	// //sensor.out -> monitor.sensedData;
 	
 	
 }
