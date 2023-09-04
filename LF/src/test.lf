@@ -1,0 +1,26 @@
+target C {
+    platform: {
+        name: "Arduino",
+        board: "arduino:avr:uno",
+        port: "/dev/ttyACM0",
+        flash: true,
+        baud-rate: 115200
+    }
+};
+
+main reactor {
+    timer t1(0 sec, 2 sec);
+    timer t2(1 sec, 2 sec);
+
+    reaction(startup) {=
+        pinMode(LED_BUILTIN, OUTPUT);
+    =}
+
+    reaction(t1) {=
+        digitalWrite(LED_BUILTIN, HIGH);
+    =}
+
+    reaction(t2) {=
+        digitalWrite(LED_BUILTIN, LOW);
+    =} 
+}
