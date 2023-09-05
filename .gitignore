@@ -7,7 +7,9 @@
 *.exe
 *.xml
 *.json
+*.txt
 progress
+execute
 
 LF/bin/*
 LF/lib/*
@@ -16,6 +18,7 @@ LF/share/*
 LF/build/*
 LF/include/*
 LF/src-gen/*
+LF/lib64/*
 .project
 CMakeLists.txt
 .lf-cpp-marker
