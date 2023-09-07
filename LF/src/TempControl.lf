@@ -9,13 +9,15 @@ reactor Controller {
     state desiredValue: int = 21
 
     reaction(currentTemp) -> heating, cooling, switchoff {=
+        printf("Current temp is %d: ", currentTemp->value);
+
         if (currentTemp->value == self->desiredValue) 
             lf_set(switchoff, true);
 
-        if (currentTemp-> value < self->desiredValue) 
+        if (currentTemp->value < self->desiredValue) 
             lf_set(heating, true); 
         
-        if (currentTemp-> value > self->desiredValue) 
+        if (currentTemp->value > self->desiredValue) 
             lf_set(cooling, true);
     =}
 
@@ -42,8 +44,8 @@ reactor Room {
         lf_set(temperature, self->currentTemp);
     =}
 
-    reaction(cooling) {= self->currentTemp += 1; =}
-    reaction(heating) {= self->currentTemp -= 1; =}
+    reaction(cooling) {= self->currentTemp -= 1; =}
+    reaction(heating) {= self->currentTemp += 1; =}
 }
 
 reactor HC_Unit {
@@ -53,15 +55,17 @@ reactor HC_Unit {
     output heating: int
     output cooling: int
 
-    reaction(heaterOn) -> heating, cooling {= 
+    reaction(heaterOn) -> heating {= 
         lf_set(heating, 1);
+        printf("Activating heating\n");
      =}
 
-    reaction(coolerOn) -> heating, cooling {= 
+    reaction(coolerOn) -> cooling {= 
         lf_set(cooling, 1);
+        printf("Activating cooling\n");
     =}
 
-    reaction(switchoff) -> heating, cooling {=  =}
+    reaction(switchoff) -> heating, cooling {= printf("Switching off\n"); =}
 }
 
 main reactor {
