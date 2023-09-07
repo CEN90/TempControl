@@ -1,19 +1,72 @@
-target Cpp;
+target C;
 
 reactor Controller {
+    input currentTemp: int
+    output heatingOn: int
+    output coolingOn: int
+    output switchoff: int
+
+    state desiredValue: int = 21
+    state heating: bool = false
+    state cooling: bool = false
+
+    reaction(currentTemp) -> heatingOn, coolingOn, switchoff {=
+        if (currentTemp->value == self->desiredValue) {
+            lf_set(switchoff, 0);
+            self->heating = false;
+            self->cooling = false;
+        }
+    =}
 
 }
 
 reactor Sensor {
+    input sensedTemp: int
+    output currentTemp: int
 
+    reaction(sensedTemp) -> currentTemp {= lf_set(currentTemp, self->sensedTemp); =}
 }
 
 reactor Room {
+    input cooling: int
+    input heating: int
+    output temperature: int
+    state currentTemp: int = 22
+    timer poll(0, 1 sec)
 
+    reaction(poll) -> temperature {=
+        if (self->currentTemp == 21) {
+            self->currentTemp -= rand() % 2; // randomly set window to open or close
+        }
+
+        lf_set(temperature, self->currentTemp);
+    =}
+
+    reaction(cooling) {= self->currentTemp += 1; =}
+    reaction(heating) {= self->currentTemp -= 1; =}
 }
 
 reactor HC_Unit {
+    input heaterOn: int
+    input coolerOn: int
+    input switchoff: int
+    output heating: int
+    output cooling: int
 
+    reaction(heaterOn) -> heating, cooling {= 
+        lf_set(heating, 1);
+        lf_set(cooling, 0);
+     =}
+
+    reaction(coolerOn) -> heating, cooling {= 
+        lf_set(heating, 0);
+        lf_set(cooling, 1);
+    =}
+
+    reaction(switchoff) -> heating, cooling {=
+        lf_set(heating, 0);
+        lf_set(cooling, 0);
+    =}
 }
 
 main reactor {

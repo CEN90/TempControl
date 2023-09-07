@@ -10,6 +10,7 @@
 *.txt
 progress
 execute
+build/*
 
 LF/bin/*
 LF/lib/*

@@ -2,5 +2,7 @@
     "autoHide.autoHidePanel": false,
     "FSharp.suggestGitignore": false,
     "dotnet.defaultSolution": "disable",
-    "autoHide.autoHideSideBar": false
+    "autoHide.autoHideSideBar": false,
+    "cmake.configureOnOpen": false,
+    "cmake.sourceDirectory": "/home/snek/Dokument/TempControl/LF/src-gen"
 }
