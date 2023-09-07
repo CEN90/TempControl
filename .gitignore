@@ -2,7 +2,7 @@
 *.h
 *.o
 *.spec
-.vscode
+.vscode/*
 .settings
 *.exe
 *.xml
