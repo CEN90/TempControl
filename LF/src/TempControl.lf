@@ -2,20 +2,21 @@ target C;
 
 reactor Controller {
     input currentTemp: int
-    output heatingOn: int
-    output coolingOn: int
-    output switchoff: int
+    output heating: bool
+    output cooling: bool
+    output switchoff: bool
 
     state desiredValue: int = 21
-    state heating: bool = false
-    state cooling: bool = false
 
-    reaction(currentTemp) -> heatingOn, coolingOn, switchoff {=
-        if (currentTemp->value == self->desiredValue) {
-            lf_set(switchoff, 0);
-            self->heating = false;
-            self->cooling = false;
-        }
+    reaction(currentTemp) -> heating, cooling, switchoff {=
+        if (currentTemp->value == self->desiredValue) 
+            lf_set(switchoff, true);
+
+        if (currentTemp-> value < self->desiredValue) 
+            lf_set(heating, true); 
+        
+        if (currentTemp-> value > self->desiredValue) 
+            lf_set(cooling, true);
     =}
 
 }
@@ -24,7 +25,7 @@ reactor Sensor {
     input sensedTemp: int
     output currentTemp: int
 
-    reaction(sensedTemp) -> currentTemp {= lf_set(currentTemp, self->sensedTemp); =}
+    reaction(sensedTemp) -> currentTemp {= lf_set(currentTemp, sensedTemp->value); =}
 }
 
 reactor Room {
@@ -35,10 +36,9 @@ reactor Room {
     timer poll(0, 1 sec)
 
     reaction(poll) -> temperature {=
-        if (self->currentTemp == 21) {
+        if (self->currentTemp == 21) 
             self->currentTemp -= rand() % 2; // randomly set window to open or close
-        }
-
+        
         lf_set(temperature, self->currentTemp);
     =}
 
@@ -47,26 +47,21 @@ reactor Room {
 }
 
 reactor HC_Unit {
-    input heaterOn: int
-    input coolerOn: int
-    input switchoff: int
+    input heaterOn: bool
+    input coolerOn: bool
+    input switchoff: bool
     output heating: int
     output cooling: int
 
     reaction(heaterOn) -> heating, cooling {= 
         lf_set(heating, 1);
-        lf_set(cooling, 0);
      =}
 
     reaction(coolerOn) -> heating, cooling {= 
-        lf_set(heating, 0);
         lf_set(cooling, 1);
     =}
 
-    reaction(switchoff) -> heating, cooling {=
-        lf_set(heating, 0);
-        lf_set(cooling, 0);
-    =}
+    reaction(switchoff) -> heating, cooling {=  =}
 }
 
 main reactor {
@@ -75,5 +70,13 @@ main reactor {
     room = new Room();
     hc_unit = new HC_Unit();
 
-    
+    room.temperature -> sensor.sensedTemp
+    sensor.currentTemp -> controller.currentTemp
+
+    controller.heating -> hc_unit.heaterOn
+    controller.cooling -> hc_unit.coolerOn
+    controller.switchoff -> hc_unit.switchoff
+
+    hc_unit.heating -> room.heating
+    hc_unit.cooling -> room.cooling 
 }
