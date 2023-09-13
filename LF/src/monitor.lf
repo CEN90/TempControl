@@ -254,69 +254,74 @@ reactor Monitoring {
        		cur_state = cur_state + 1;
     	}
     =}
+
 	reaction(activate_c,activate_h,switchoff) -> out_activate_c, out_activate_h, out_switchoff {=
         bool equal = false;
         auto elapsed_time = get_elapsed_logical_time();
 		auto elapsed_secs = std::chrono::duration_cast<std::chrono::seconds>(elapsed_time);
         long current_time = elapsed_secs.count();
+
         if(activate_c.is_present()){
             if(current_time == (x + timingInterval)){
-			if(trans[cur_state][0] == labels[1]){
-                for(int i = 0; i < state_Id.size(); i++){ 
-                        if(ld_states[cur_state][0] == state_Id[i]){
-							equal = true;
-							index = i;
-						}
-            	}
-        	}
-        	if(equal != true){
-                std::cout << "ALARM:FALSE_COMMAND_C" << "\n"; 
-                exit(0);
-            }
+				if(trans[cur_state][0] == labels[1]){
+					for(int i = 0; i < state_Id.size(); i++){ 
+							if(ld_states[cur_state][0] == state_Id[i]){
+								equal = true;
+								index = i;
+							}
+					}
+				}
+				if(equal != true){
+					std::cout << "ALARM:FALSE_COMMAND_C" << "\n"; 
+					exit(0);
+				}
        		}
        		cur_state = index; 
        		out_activate_c.set(1);
         } else if(activate_h.is_present()){
             if(cur_state == 10) {
-            }else if(current_time == (x + timingInterval)){
-			if(trans[cur_state][0] == labels[2]){
-                for(int i = 0; i < state_Id.size(); i++){  
-                        if(ld_states[cur_state][0] == state_Id[i]){
-								equal = true;
-								index = i;
-						}
-            	}
-        	}
-        	if(equal != true){
-                std::cout << "ALARM:FALSE_COMMAND_H" << "\n";
-                exit(0); 
-            }
+            } else if(current_time == (x + timingInterval)){
+				if(trans[cur_state][0] == labels[2]){
+					for(int i = 0; i < state_Id.size(); i++){  
+							if(ld_states[cur_state][0] == state_Id[i]){
+									equal = true;
+									index = i;
+							}
+					}
+				}
+				if(equal != true){
+					std::cout << "ALARM:FALSE_COMMAND_H" << "\n";
+					exit(0); 
+				}
        		}
        		out_activate_h.set(1);
         } else if(switchoff.is_current_time()){
             if(current_time == (x + timingInterval)){
-			if(trans[cur_state][0] == labels[3]){
-                for(int i = 0; i < state_Id.size(); i++){ 
-                        if(ld_states[cur_state][0] == state_Id[i]){
-							equal = true;
-							index = i;
-						}
-            	}
-        	}
-        	if(equal != true){
-                std::cout << "ALARM:FALSE_COMMAND_OFF" << "\n";
-                exit(0); 
-            }
-       		}
-       		out_switchoff.set(1);
+				if(trans[cur_state][0] == labels[3]){
+					for(int i = 0; i < state_Id.size(); i++){ 
+							if(ld_states[cur_state][0] == state_Id[i]){
+								equal = true;
+								index = i;
+							}
+					}
+				}
+				if(equal != true){
+					std::cout << "ALARM:FALSE_COMMAND_OFF" << "\n";
+					exit(0); 
+				}
+       	}
+       		
+			out_switchoff.set(1);
         }
-       
-       if(cur_state != 10) {     
-       cur_state = index; 
-       if(trans[cur_state][0].find("TIME")!= std::string::npos){
-        x = x + timingInterval;
-       cur_state = cur_state + 1;
-       }}
+		
+		if(cur_state != 10) {     
+			cur_state = index; 
+			
+			if(trans[cur_state][0].find("TIME")!= std::string::npos){
+				x = x + timingInterval;
+				cur_state = cur_state + 1;
+			}	
+		}
     =}
     
     

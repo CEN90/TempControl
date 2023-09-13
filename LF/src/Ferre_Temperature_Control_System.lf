@@ -1,4 +1,14 @@
-target Cpp;   
+target Cpp {
+    platform: {
+        name: "Arduino",
+        board: "arduino:avr:uno",
+        port: "/dev/ttyACM0",
+        flash: false,
+        baud-rate: 115200
+    }
+}
+
+
 //import Monitor.lf;   
 reactor Controller { 
     input getSense:int;  
