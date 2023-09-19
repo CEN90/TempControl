@@ -9,21 +9,40 @@
 
 #define POLL_TIME         1000
 
+
+
 #include "EdgeReader.hpp"
 
 void setup() {
-    Serial.begin(115200);
+    Serial.begin(BAUD);
 
-    EdgeReader edges;
-    auto test = edges.tester();
+    EdgeReader edgereader;
+    auto edges = edgereader.getEdges();
+    
+    // Serial.println(F("Got here"));
+    Serial.println(edges.size());
 
-    Serial.print(test.from);
-    Serial.print(" -> ");
-    Serial.print(test.label);
-    Serial.print(" -> ");
-    Serial.print(test.to);
-    Serial.print(" -> ");
-    Serial.println(test.value);
+    // for (size_t i = 0; i < edges.size(); i++)
+    // {
+    //     Serial.println(i);
+        // edgereader.printEdge(edges[i]);
+        // Serial.print(edges[i].from);
+        // Serial.print(" -> ");
+        // Serial.print(edges[i].label);
+        // Serial.print(" -> ");
+        // Serial.print(edges[i].to);
+        // Serial.print(" -> ");
+        // Serial.println(edges[i].value);
+    // }
+    
+    // auto test = edges.tester();
+
+// enum
+    // 1 - setCurrent
+    // 2 - cooling
+    // 3 - heating
+    // 4 - switchoff
+    // from, enum mess, value, to
 }
 
 void loop() {
