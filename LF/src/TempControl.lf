@@ -74,7 +74,7 @@ main reactor {
     room = new Room();
     hc_unit = new HC_Unit();
 
-    room.temperature -> sensor.sensedTemp
+    room.temperature -> sensor.sensedTemp after 1 sec
     sensor.currentTemp -> controller.currentTemp
 
     controller.heating -> hc_unit.heaterOn
