@@ -36,7 +36,8 @@ EdgeReader::~EdgeReader()
 }
 
 struct Edge EdgeReader::tester() {
-    String line = "(648,\"controller.setcurrent[20].[]\",659)";
+    // String line = "(648,\"controller.setcurrent[20].[]\",659)";
+    String line = "(671,\"hc_unit.switchoff[].[]\",679)";
     return this->edgeStruct(line);
 }
 
@@ -47,22 +48,21 @@ struct Edge EdgeReader::edgeStruct(String line) {
         exit(EXIT_FAILURE);
     }
     
-    Edge edge;
-    
     String sub_str = line.substring(1, line.length() - 1); 
     auto label_begin = sub_str.indexOf(",\"");
     auto label_end = sub_str.indexOf("\",");
     
-    String from_str = sub_str.substring(0, label_begin);
-    String to_str = sub_str.substring(label_end + 2);
+    Edge edge;
     
-    sub_str.remove(label_end);
-    String label = sub_str.substring(label_begin + 2);
-
-    edge.label = label;
-    edge.from = from_str.toInt();
-    edge.to = to_str.toInt();
+    // Hard coded magic values, look away...
+    edge.from = sub_str.substring(0, label_begin).toInt();
+    edge.to = sub_str.substring(label_end + 2).toInt();
+    edge.label = sub_str.substring(label_begin + 2, sub_str.indexOf("["));
+    String value = sub_str.substring(sub_str.indexOf("[") + 1, sub_str.indexOf("]"));
     edge.value = -1;
+
+    if (value.length() > 0)
+        edge.value = value.toInt();
 
     return edge;
 }

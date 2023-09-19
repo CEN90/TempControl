@@ -21,7 +21,9 @@ void setup() {
     Serial.print(" -> ");
     Serial.print(test.label);
     Serial.print(" -> ");
-    Serial.println(test.to);
+    Serial.print(test.to);
+    Serial.print(" -> ");
+    Serial.println(test.value);
 }
 
 void loop() {
