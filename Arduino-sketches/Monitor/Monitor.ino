@@ -14,13 +14,14 @@
 #include "EdgeReader.hpp"
 
 void setup() {
-    Serial.begin(BAUD);
+    // Serial.begin(BAUD);
 
     EdgeReader edgereader;
-    auto edges = edgereader.getEdges();
+    edgereader.test();
+    // auto edges = edgereader.getEdges();
     
-    // Serial.println(F("Got here"));
-    Serial.println(edges.size());
+    // // Serial.println(F("Got here"));
+    // Serial.println(edges.size());
 
     // for (size_t i = 0; i < edges.size(); i++)
     // {
