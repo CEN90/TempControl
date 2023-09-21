@@ -1,14 +1,11 @@
 #include <SD.h>
 
-// #include <Vector.h>
-
 #define PIN_SPI_CS 53 // Mega
 // #define PIN_SPI_CS 10 // Uno 
 #define BAUD       115200
 #define MAXTRANSITIONS 121
 
-struct Edge
-{
+struct Edge {
     int from;
     int label;
     int value;
@@ -17,32 +14,34 @@ struct Edge
 
 enum FileOp { Transition, Name };
 
-class EdgeReader
-{
-private:
-    int totalTransitions(String line);
-    bool checkStorage(String filename);
-    int replaceLabel(String label);
-    struct Edge edgeStruct(String line);
-    int readFile(String filename, FileOp op);
+class EdgeReader {
+    private:
+        int totalTransitions(String line);
+        bool checkStorage(String filename);
+        int replaceLabel(String label);
+        struct Edge edgeStruct(String line);
+        int readFile(String filename, FileOp op);
 
-    struct Edge* edges;
-    String* edgenames;
-    int edges_size = 0;
-    int edgenames_size = 0;
+        struct Edge* edges;
+        String* edgenames;
+        int edges_size = 0;
+        int edgenames_size = 0;
 
-public:
-    EdgeReader();
-    ~EdgeReader();
+    public:
+        EdgeReader();
+        ~EdgeReader();
 
-    void test();
-    void printEdge(struct Edge edge);
+        void test();
+        void printEdge(struct Edge edge);
 
-    int getEdges(struct Edge* edges);
-    int getEdgenames(String* edgenames);
+        int getEdges(struct Edge* edges);
+        int getEdgenames(String* edgenames);
 };
 
-EdgeReader::EdgeReader() { }
+EdgeReader::EdgeReader() {
+    edgenames_size = readFile("states.txt", Name);
+    edges_size = readFile("states.aut", Transition);
+ }
 EdgeReader::~EdgeReader() { }
 
 // Get function for edge names
