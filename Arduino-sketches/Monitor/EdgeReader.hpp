@@ -67,8 +67,8 @@ int EdgeReader::getEdges(struct Edge* _edges) {
 void EdgeReader::test() {
     Serial.println("Glider in i EdgeReader");
 
-    edgenames_size = readFile("states.txt", Name);
-    edges_size = readFile("states.aut", Transition);
+    // edgenames_size = readFile("states.txt", Name);
+    // edges_size = readFile("states.aut", Transition);
 
     for (size_t i = 0; i < edgenames_size; i++) {
         Serial.println(edgenames[i]);
