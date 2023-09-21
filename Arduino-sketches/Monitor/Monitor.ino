@@ -14,7 +14,7 @@
 void setup() {
     Serial.begin(BAUD);
 
-    EdgeReader edgereader;
+    EdgeReader edgereader("states.txt", "states.aut");
     edgereader.test();
 
 // enum

@@ -28,7 +28,7 @@ class EdgeReader {
         int edgenames_size = 0;
 
     public:
-        EdgeReader();
+        EdgeReader(String statenames, String statetransitions);
         ~EdgeReader();
 
         void test();
@@ -38,9 +38,9 @@ class EdgeReader {
         int getEdgenames(String* edgenames);
 };
 
-EdgeReader::EdgeReader() {
-    edgenames_size = readFile("states.txt", Name);
-    edges_size = readFile("states.aut", Transition);
+EdgeReader::EdgeReader(String statenames, String statetransitions) {
+    edgenames_size = readFile(statenames, Name);
+    edges_size = readFile(statetransitions, Transition);
  }
 EdgeReader::~EdgeReader() { }
 
