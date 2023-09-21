@@ -15,15 +15,22 @@ void setup() {
     Serial.begin(BAUD);
 
     EdgeReader edgereader("states.txt", "states.aut");
-    edgereader.test();
 
-// enum
-    // 0 - Unknown
-    // 1 - setCurrent
-    // 2 - cooling
-    // 3 - heating
-    // 4 - switchoff
-    // from, enum mess, value, to
+    Transitions transitions = edgereader.edges;
+
+    for (size_t i = 0; i < edgereader.size(); i++) {
+        edgereader.printEdge(transitions[i]);
+    }
+    
+    Serial.println(F("Done"));
+
+    // enum
+        // 0 - Unknown
+        // 1 - setCurrent
+        // 2 - cooling
+        // 3 - heating
+        // 4 - switchoff
+        // from, enum mess, value, to
 }
 
 void loop() {

@@ -12,7 +12,10 @@ struct Edge {
     int to;
 };
 
-enum FileOp { Transition, Name };
+typedef struct Edge* Transitions;
+typedef String* Edgenames;
+
+enum FileOp { Transition, Name }; // Read mode from files
 
 class EdgeReader {
     private:
@@ -22,53 +25,31 @@ class EdgeReader {
         struct Edge edgeStruct(String line);
         int readFile(String filename, FileOp op);
 
-        struct Edge* edges;
-        String* edgenames;
-        int edges_size = 0;
-        int edgenames_size = 0;
-
     public:
         EdgeReader(String statenames, String statetransitions);
         ~EdgeReader();
 
+        int size();
         void test();
         void printEdge(struct Edge edge);
-
-        int getEdges(struct Edge* edges);
-        int getEdgenames(String* edgenames);
+        
+        struct Edge* edges;
+        String* edgenames;
+        int edges_size = 0;
+        int edgenames_size = 0;
 };
 
 EdgeReader::EdgeReader(String statenames, String statetransitions) {
     edgenames_size = readFile(statenames, Name);
     edges_size = readFile(statetransitions, Transition);
  }
+
 EdgeReader::~EdgeReader() { }
 
-// Get function for edge names
-int EdgeReader::getEdgenames(String* _edgenames) {
-    if (_edgenames != NULL || edgenames == NULL || edgenames_size <= 0) {
-        return -1;
-    }
-    
-    _edgenames = edgenames;
-    return edgenames_size;
-}
-
-// Get function for edges
-int EdgeReader::getEdges(struct Edge* _edges) {
-    if (_edges != NULL || edges == NULL || edges_size <= 0) {
-        return -1;
-    }
-    
-    _edges = edges;
-    return edges_size;
-}
+int EdgeReader::size() { return edges_size; }
 
 void EdgeReader::test() {
     Serial.println("Glider in i EdgeReader");
-
-    // edgenames_size = readFile("states.txt", Name);
-    // edges_size = readFile("states.aut", Transition);
 
     for (size_t i = 0; i < edgenames_size; i++) {
         Serial.println(edgenames[i]);
@@ -113,7 +94,7 @@ struct Edge EdgeReader::edgeStruct(String line) {
     edge.to = sub_str.substring(label_end + 2).toInt();
     edge.label = replaceLabel(sub_str.substring(label_begin + 2, sub_str.indexOf("[")));
 
-    // Some transitions do not have a value, send -1 instead
+    // Some transitions do not have a value associated, send -1 instead
     String value = sub_str.substring(sub_str.indexOf("[") + 1, sub_str.indexOf("]"));
     edge.value = value.length() > 0 ? value.toInt() : -1;
 
@@ -124,7 +105,6 @@ void EdgeReader::printEdge(struct Edge edge) {
     Serial.print(edge.from);
     Serial.print(" -> ");
     Serial.print(edgenames[edge.label]);
-    // Serial.print(edge.label);
     Serial.print(" -> ");
     Serial.print(edge.to);
     Serial.print(" -> ");
