@@ -643,7 +643,7 @@ main reactor {
 		
 		
 		//print out the state transition system with time shift transitions
-		writeFile.open("/Users/fmi04/runtime-EclipseXtext/roomT_GitHub/src-gen/bin/castfile.aut", std::ofstream::out | std::ofstream::trunc);
+		writeFile.open("/home/victor/Dokument/TempControl-1/LF/src/castfile.aut", std::ofstream::out | std::ofstream::trunc);
 		std::cout << "NUBMER OF STATES: " << state_Id.size() << " NUBMER OF TRANSITIONS: " << transitions.size() +  cntShift <<"\n";
 		writeFile << "des (0, " << transitions.size() +  cntShift << ", " << state_Id.size() << ")" <<'\n';
 		for(int i = 0; i < state_Id.size(); i++){
