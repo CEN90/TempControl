@@ -1,36 +1,47 @@
-// Pin definitions
-// #define HEATING_IN        8
-// #define COOLING_IN        9
-// #define SWITCH_OFF_IN     10
-
-// #define HEATING_OUT       5
-// #define COOLING_OUT       6
-// #define SWITCH_OFF_OUT    7
-
-#define POLL_TIME         1000
-
 #include "EdgeReader.hpp"
 
+// Pin definitions
+#define MAIN_SENSOR_IN    A0
+#define HEATING_IN        8
+#define COOLING_IN        9
+#define SWITCH_OFF_IN     10
+
+#define POLL_TIME         1000
+#define ADC_RESOLUTION    1024.0
+#define POLL_TIME         1000
+
+
+EdgeReader edgereader("states.txt", "states.aut");
+Transitions transitions = edgereader.edges;
+
+int current_state = 0;
+int next_state = 0;
+
+float getTemperature(int sensor) {
+    // convert the ADC value to voltage in millivolt
+    float voltage = 5.0 * (analogRead(sensor) / ADC_RESOLUTION);
+
+    // convert the voltage to the temperature in Celsius
+    return (voltage - 0.5) * 100;
+}
+
 void setup() {
+    pinMode(HEATING_IN, INPUT);
+    pinMode(COOLING_IN, INPUT);
+    pinMode(SWITCH_OFF_IN, INPUT);
+    pinMode(MAIN_SENSOR_IN, INPUT);
+
     Serial.begin(BAUD);
-
-    EdgeReader edgereader("states.txt", "states.aut");
-
-    Transitions transitions = edgereader.edges;
 
     for (size_t i = 0; i < edgereader.size(); i++) {
         edgereader.printEdge(transitions[i]);
     }
+
+    Serial.println("");
+    Serial.print(F("Startstate is "));
+    Serial.println(edgereader.start_state);
     
     Serial.println(F("Done"));
-
-    // enum
-        // 0 - Unknown
-        // 1 - setCurrent
-        // 2 - cooling
-        // 3 - heating
-        // 4 - switchoff
-        // from, enum mess, value, to
 }
 
 void loop() {

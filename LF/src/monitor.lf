@@ -59,7 +59,7 @@ reactor Monitoring {
 
 			size_t sPoint, ePoint;
 
-			sPoint = line.find("id=");
+			  = line.find("id=");
 			ePoint = line.find("_");
 
 			size_t foundTransition = line.find("<transition");

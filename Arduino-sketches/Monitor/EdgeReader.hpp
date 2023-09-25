@@ -19,11 +19,11 @@ enum FileOp { Transition, Name }; // Read mode from files
 
 class EdgeReader {
     private:
-        int totalTransitions(String line);
         bool checkStorage(String filename);
         int replaceLabel(String label);
         struct Edge edgeStruct(String line);
         int readFile(String filename, FileOp op);
+        int totalTransitions(String line, int* start_state);
 
     public:
         EdgeReader(String statenames, String statetransitions);
@@ -36,6 +36,7 @@ class EdgeReader {
         struct Edge* edges;
         String* edgenames;
         int edges_size = 0;
+        int start_state = 0;
         int edgenames_size = 0;
 };
 
@@ -127,11 +128,12 @@ bool EdgeReader::checkStorage(String filename) {
 }
 
 // Get total transitions from line 'des ([start], [total transitions], [total states])'
-int EdgeReader::totalTransitions(String line) {
+int EdgeReader::totalTransitions(String line, int* start_state) {
     if (!line.startsWith("des")) {
         return -1;
     }
     
+    *start_state = line.substring(line.indexOf("(") + 1, line.indexOf(",")).toInt();
     auto sub_line = line.substring(line.indexOf(",") + 1, line.lastIndexOf(",")).toInt();
 
     return sub_line <= 0 ? -1 : sub_line;
@@ -150,7 +152,7 @@ int EdgeReader::readFile(String filename, FileOp op) {
 
     // Allocating different arrs depending on operation
     if (op == Transition) {
-        file_len = totalTransitions(file.readStringUntil('\n'));
+        file_len = totalTransitions(file.readStringUntil('\n'), &start_state);
         edges = new Edge[file_len];
     }
     
