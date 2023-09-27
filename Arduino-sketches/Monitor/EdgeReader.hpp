@@ -3,7 +3,6 @@
 #define PIN_SPI_CS 53 // Mega
 // #define PIN_SPI_CS 10 // Uno 
 #define BAUD       115200
-#define MAXTRANSITIONS 121
 
 struct Edge {
     int from;
@@ -13,102 +12,101 @@ struct Edge {
 };
 
 typedef struct Edge* Transitions;
-typedef String* Edgenames;
-
-enum FileOp { Transition, Name }; // Read mode from files
 
 class EdgeReader {
     private:
+        int parseValue(String line);
         bool checkStorage(String filename);
         int replaceLabel(String label);
         struct Edge edgeStruct(String line);
-        int readFile(String filename, FileOp op);
+        int readFile(String filename);
         int totalTransitions(String line, int* start_state);
 
     public:
-        EdgeReader(String statenames, String statetransitions);
+        EdgeReader();
         ~EdgeReader();
 
-        int size();
-        void test();
         void printEdge(struct Edge edge);
+        int readTransitions(String statetransitions, String* names, int name_len);
         
-        struct Edge* edges;
         String* edgenames;
+        struct Edge* edges;
         int edges_size = 0;
         int start_state = 0;
         int edgenames_size = 0;
 };
 
-EdgeReader::EdgeReader(String statenames, String statetransitions) {
-    edgenames_size = readFile(statenames, Name);
-    edges_size = readFile(statetransitions, Transition);
- }
+EdgeReader::EdgeReader() { }
 
 EdgeReader::~EdgeReader() { }
 
-int EdgeReader::size() { return edges_size; }
+// Read in transitions from sd-card, returns number of lines read
+int EdgeReader::readTransitions(String statetransitions, String* names, int name_len) {
+    edgenames = names;
+    edgenames_size = name_len;
 
-void EdgeReader::test() {
-    Serial.println("Glider in i EdgeReader");
-
-    for (size_t i = 0; i < edgenames_size; i++) {
-        Serial.println(edgenames[i]);
-    }
-
-    for (size_t i = 0; i < edges_size; i++) {
-        printEdge(edges[i]);
-    }
-
-    Serial.println(F("Done printing"));
+    edges_size = readFile(statetransitions);
+    return edges_size;
 }
 
 // Storing transition label as a string and ref later due to memory shortage on arduino
 int EdgeReader::replaceLabel(String label) {
     int replacement = 0;
 
-    for (int i = 0; i < edgenames_size; i++) {
-        if (edgenames[i].equals(label)) {
+    for (int i = 0; i < edgenames_size; i++) {   
+        if (label.startsWith(edgenames[i])) {
             replacement = i;
         }
     }
-    
+
     return replacement; // ID for later
+}
+
+// Parses a value from label string, -1 if no value found
+int EdgeReader::parseValue(String label) {
+    int time = label.indexOf("+="); // "time +=<int>"
+    if (time != -1) {
+        return label.substring(time + 2, label.indexOf("\"")).toInt();
+    }
+    
+    int param = label.indexOf("["); // controller.setcurrent[<int>]
+    if (param != -1) {
+        return label.substring(param + 1, label.indexOf("]")).toInt();
+    }
+
+    return -1;
 }
 
 // Given a string containing an edge return a struct Edge with the data
 struct Edge EdgeReader::edgeStruct(String line) {
     if (!line.startsWith("(") && !line.endsWith(")")) {
+        Serial.println(line);
         Serial.println(F("Mismatched input, not an edge!"));
         delay(100);
         exit(EXIT_FAILURE);
     }
     
     String sub_str = line.substring(1, line.length() - 1); 
-    auto label_begin = sub_str.indexOf(",\"");
-    auto label_end = sub_str.indexOf("\",");
+    String label = sub_str.substring(sub_str.indexOf("\"") + 1, sub_str.lastIndexOf("\""));
     
     Edge edge;
     
-    // Hard coded magic values, look away...
-    edge.from = sub_str.substring(0, label_begin).toInt();
-    edge.to = sub_str.substring(label_end + 2).toInt();
-    edge.label = replaceLabel(sub_str.substring(label_begin + 2, sub_str.indexOf("[")));
-
-    // Some transitions do not have a value associated, send -1 instead
-    String value = sub_str.substring(sub_str.indexOf("[") + 1, sub_str.indexOf("]"));
-    edge.value = value.length() > 0 ? value.toInt() : -1;
+    edge.from = sub_str.substring(0, sub_str.indexOf(",")).toInt();
+    edge.to = sub_str.substring(sub_str.lastIndexOf(",") + 1).toInt();
+    edge.label = replaceLabel(label);
+    edge.value = parseValue(label);
 
     return edge;
 }
 
+// for testing purposes
 void EdgeReader::printEdge(struct Edge edge) {
     Serial.print(edge.from);
     Serial.print(" -> ");
     Serial.print(edgenames[edge.label]);
     Serial.print(" -> ");
     Serial.print(edge.to);
-    Serial.print(" -> ");
+    Serial.print(": ");
     Serial.println(edge.value);
 }
 
@@ -133,41 +131,33 @@ int EdgeReader::totalTransitions(String line, int* start_state) {
         return -1;
     }
     
+    // save start state in field start_state, needed for monitor later
     *start_state = line.substring(line.indexOf("(") + 1, line.indexOf(",")).toInt();
-    auto sub_line = line.substring(line.indexOf(",") + 1, line.lastIndexOf(",")).toInt();
-
-    return sub_line <= 0 ? -1 : sub_line;
+    
+    // return [total transitions]
+    return line.substring(line.indexOf(",") + 1, line.lastIndexOf(",")).toInt();
 }
 
-// Combined function to read in names of transitions and the transitions themselves, therefore FileOp paramater
-int EdgeReader::readFile(String filename, FileOp op) {
+// Reads in transitions from filename, returns lines read. Transitions are stored as structs in field edges
+int EdgeReader::readFile(String filename) {
     if (!checkStorage(filename)) {
         Serial.println(F("Error opening SD-card"));
         delay(100);
         exit(EXIT_FAILURE);
     }
     
-    int file_len = 0;
     File file = SD.open(filename);
+    int file_len = totalTransitions(file.readStringUntil('\n'), &start_state);
 
-    // Allocating different arrs depending on operation
-    if (op == Transition) {
-        file_len = totalTransitions(file.readStringUntil('\n'), &start_state);
-        edges = new Edge[file_len];
-    }
-    
-    if (op == Name) {
-        file_len = file.read();
-        edgenames = new String[file_len];
-    }
-    
-    if (file_len <= 0) {
+    if (file_len <= 0) { // Something wrong with file
         Serial.println(F("Error reading number of states"));
         delay(100);
         exit(EXIT_FAILURE);
     }
+    
+    edges = new Edge[file_len];
 
-    if (op == Transition && edges == NULL || op == Name && edgenames == NULL) {
+    if (edges == NULL) { // allocation check
         Serial.println(F("Error allocating memory"));
         delay(100);
         exit(EXIT_FAILURE);
@@ -175,17 +165,9 @@ int EdgeReader::readFile(String filename, FileOp op) {
     
     int lines_added = 0;
 
+    // Read file until eof
     while (file.available()) {
-        String line = file.readStringUntil('\n');
-
-        if (op == Transition) {
-            edges[lines_added] = edgeStruct(line);
-        }
-    
-        if (op == Name) {
-            edgenames[lines_added] = line;
-        }
-
+        edges[lines_added] = edgeStruct(file.readStringUntil('\n'));
         lines_added += 1;
     }
     

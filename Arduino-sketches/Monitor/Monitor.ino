@@ -1,3 +1,4 @@
+// #include "Edges.hpp"
 #include "EdgeReader.hpp"
 
 // Pin definitions
@@ -9,10 +10,16 @@
 #define POLL_TIME         1000
 #define ADC_RESOLUTION    1024.0
 #define POLL_TIME         1000
+#define STATES_LEN        6
 
-
-EdgeReader edgereader("states.txt", "states.aut");
-Transitions transitions = edgereader.edges;
+String names[] = {
+        "other",
+        "controller.setcurrent",
+        "time",
+        "hc_unit.setheating",
+        "hc_unit.setcooling",
+        "hc_unit.switchoff"
+        };
 
 int current_state = 0;
 int next_state = 0;
@@ -25,23 +32,28 @@ float getTemperature(int sensor) {
     return (voltage - 0.5) * 100;
 }
 
+
+
+EdgeReader edgereader = EdgeReader();
+Transitions transitions;
+
 void setup() {
+    Serial.begin(BAUD);
+
     pinMode(HEATING_IN, INPUT);
     pinMode(COOLING_IN, INPUT);
     pinMode(SWITCH_OFF_IN, INPUT);
     pinMode(MAIN_SENSOR_IN, INPUT);
-
-    Serial.begin(BAUD);
-
-    for (size_t i = 0; i < edgereader.size(); i++) {
-        edgereader.printEdge(transitions[i]);
-    }
-
-    Serial.println("");
-    Serial.print(F("Startstate is "));
-    Serial.println(edgereader.start_state);
     
-    Serial.println(F("Done"));
+    auto trans = edgereader.readTransitions("states.aut", names, STATES_LEN);
+
+    Serial.println(trans);
+
+    for (size_t i = 0; i < edgereader.edges_size; i++)
+    {
+        edgereader.printEdge(edgereader.edges[i]);
+    }
+    
 }
 
 void loop() {
