@@ -42,23 +42,22 @@ EdgeReader::EdgeReader() { }
 
 EdgeReader::~EdgeReader() { }
 
+// Workaround for finding all transitions with the same from-state
 int EdgeReader::findState(int searched, int* startpos, int* endpos) {
     *startpos = searched;
 
-    while (edges[*startpos].from != searched && *startpos < edges_size)
-    {
+    while (edges[*startpos].from != searched && *startpos < edges_size) {
         *startpos += 1;
     }
 
     *endpos = *startpos;
     
-    while (edges[*endpos + 1].from == searched && *endpos < edges_size)
-    {
+    while (edges[*endpos + 1].from == searched && *endpos < edges_size) {
         *endpos += 1;
     }
     
     int len = *endpos - *startpos + 1;
-    return len > 0 ? len : -1; 
+    return len > 0 ? len : -1; // hedge against fuck ups, -1 if error
 }
 
 // Read in transitions from sd-card, returns number of lines read
@@ -95,7 +94,7 @@ int EdgeReader::parseValue(String label) {
         return label.substring(param + 1, label.indexOf("]")).toInt();
     }
 
-    return -1;
+    return -1; // error
 }
 
 // Given a string containing an edge return a struct Edge with the data

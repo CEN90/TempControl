@@ -6,11 +6,14 @@
 #define SWITCH_OFF_IN     10
 
 #define POLL_TIME         1000
-#define ADC_RESOLUTION    1024.0
-#define POLL_TIME         1000
 #define STATES_LEN        6
+#define ADC_RESOLUTION    1024.0
 
-String wait = "time";
+const int time = 2;
+const int heating = 3;
+const int cooling = 4;
+const int switchoff = 5;
+
 String names[] = {
         "other",
         "controller.setcurrent",
@@ -34,4 +37,10 @@ void setPins() {
     pinMode(SWITCH_OFF_IN, INPUT);
     pinMode(MAIN_SENSOR_IN, INPUT);
     pinMode(AUX_SENSOR_IN, INPUT);
+}
+
+void giveUp(String msg) {
+    Serial.println(msg);
+    delay(POLL_TIME);
+    exit(EXIT_FAILURE);
 }
