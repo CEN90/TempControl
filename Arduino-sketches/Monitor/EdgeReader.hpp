@@ -20,17 +20,19 @@ class EdgeReader {
         int replaceLabel(String label);
         struct Edge edgeStruct(String line);
         int readFile(String filename);
-        int totalTransitions(String line, int* start_state);
+        int readDesc(String line, int* start_state, int* len_state);
 
     public:
         EdgeReader();
         ~EdgeReader();
 
         void printEdge(struct Edge edge);
+        int findState(int searched, int* startpos, int* endpos);
         int readTransitions(String statetransitions, String* names, int name_len);
         
         String* edgenames;
         struct Edge* edges;
+        int len_state = 0;
         int edges_size = 0;
         int start_state = 0;
         int edgenames_size = 0;
@@ -39,6 +41,25 @@ class EdgeReader {
 EdgeReader::EdgeReader() { }
 
 EdgeReader::~EdgeReader() { }
+
+int EdgeReader::findState(int searched, int* startpos, int* endpos) {
+    *startpos = searched;
+
+    while (edges[*startpos].from != searched && *startpos < edges_size)
+    {
+        *startpos += 1;
+    }
+
+    *endpos = *startpos;
+    
+    while (edges[*endpos + 1].from == searched && *endpos < edges_size)
+    {
+        *endpos += 1;
+    }
+    
+    int len = *endpos - *startpos + 1;
+    return len > 0 ? len : -1; 
+}
 
 // Read in transitions from sd-card, returns number of lines read
 int EdgeReader::readTransitions(String statetransitions, String* names, int name_len) {
@@ -126,13 +147,14 @@ bool EdgeReader::checkStorage(String filename) {
 }
 
 // Get total transitions from line 'des ([start], [total transitions], [total states])'
-int EdgeReader::totalTransitions(String line, int* start_state) {
+int EdgeReader::readDesc(String line, int* start_state, int* len_state) {
     if (!line.startsWith("des")) {
         return -1;
     }
     
     // save start state in field start_state, needed for monitor later
     *start_state = line.substring(line.indexOf("(") + 1, line.indexOf(",")).toInt();
+    *len_state = line.substring(line.lastIndexOf(",") + 1, line.indexOf(")")).toInt();
     
     // return [total transitions]
     return line.substring(line.indexOf(",") + 1, line.lastIndexOf(",")).toInt();
@@ -147,7 +169,7 @@ int EdgeReader::readFile(String filename) {
     }
     
     File file = SD.open(filename);
-    int file_len = totalTransitions(file.readStringUntil('\n'), &start_state);
+    int file_len = readDesc(file.readStringUntil('\n'), &start_state, &len_state);
 
     if (file_len <= 0) { // Something wrong with file
         Serial.println(F("Error reading number of states"));
