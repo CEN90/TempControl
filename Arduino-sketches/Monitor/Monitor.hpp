@@ -1,14 +1,18 @@
 // Pin definitions
-#define MAIN_SENSOR_IN    A0
-#define AUX_SENSOR_IN     A1
+#define MAIN_SENSOR_IN    A4
+#define AUX_SENSOR_IN     A8
 #define HEATING_IN        8
 #define COOLING_IN        9
 #define SWITCH_OFF_IN     10
 
-#define POLL_TIME         1000
+#define POLL_TIME         100
+#define MUL_TIME          1000
 #define STATES_LEN        6
 #define ADC_RESOLUTION    1024.0
 
+#define SMOOTHING         100
+
+const int setcurrent = 1;
 const int time = 2;
 const int heating = 3;
 const int cooling = 4;
@@ -23,12 +27,30 @@ String names[] = {
         "hc_unit.switchoff"
 };
 
-float getTemperature(int sensor) {
+float readSensor(int sensor) {
     // convert the ADC value to voltage in millivolt
     float voltage = 5.0 * (analogRead(sensor) / ADC_RESOLUTION);
 
     // convert the voltage to the temperature in Celsius
     return (voltage - 0.5) * 100;
+}
+
+int smoothInput(int sensor) {
+    int readings[SMOOTHING];
+    int total = 0;
+
+    for (size_t i = 0; i < SMOOTHING; i++)
+    {
+        readings[i] = readSensor(sensor);
+        total += readings[i];
+        delay(1);
+    }
+
+    return total / SMOOTHING;
+}
+
+int getTemperature(int sensor) {
+    return smoothInput(sensor);
 }
 
 void setPins() {

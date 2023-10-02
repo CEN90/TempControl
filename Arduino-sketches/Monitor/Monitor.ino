@@ -15,9 +15,13 @@ void checkTempSensors() {
     temp_aux_sensor = getTemperature(AUX_SENSOR_IN);
 
     // Compare main and aux sensors for bad data
-    if (temp_main_sensor != temp_aux_sensor) {
-        Serial.println("ALERT: Mismatch between sensors!");
-    }
+    // if (temp_main_sensor != temp_aux_sensor) {
+    //     Serial.print("ALERT: Mismatch between sensors!");
+    //     Serial.print(" Main sensor: ");
+    //     Serial.print(temp_main_sensor);
+    //     Serial.print(", aux sensor: ");
+    //     Serial.println(temp_aux_sensor);
+    // }
 }
 
 
@@ -38,12 +42,13 @@ void loop() {
 
     // On error alert and stop
     if (current_state == -1) {
-        giveUp("ALERT: lost place in state, stopping!");
+        current_state = next_state = 0;
+        // giveUp("ALERT: lost place in state, stopping!");
     }
     
 
     int startpos, endpos, len_states, sleep = POLL_TIME;
-    int len_states = edgereader.findState(current_state, &startpos, &endpos);
+    len_states = edgereader.findState(current_state, &startpos, &endpos);
 
     if (len_states == -1) { // Shouldn't occur
         giveUp("Error at getting next state!");
@@ -54,10 +59,15 @@ void loop() {
     {
         auto state = edgereader.edges[startpos];
 
+        Serial.println(names[state.label]);
+
         switch (state.label)
         {
         case time:
-            sleep = state.value * POLL_TIME;
+            Serial.print("Sleeping ");
+            sleep = state.value * MUL_TIME;
+            Serial.print(state.value);
+            Serial.println(" sec");
             break;
 
         case heating:
@@ -77,13 +87,23 @@ void loop() {
                 Serial.println(F("ALERT: HC_Unit not turned off!"));
             }
             break;
+
+        case setcurrent:
+            next_state = state.to;
+            Serial.print("Going from state ");
+            Serial.print(state.from);
+            Serial.print(" to state ");
+            Serial.println(state.to);
+            break;
         
         default:
-            Serial.println(F("Error at reading state!"));
+            Serial.print("state.label: ");
+            Serial.print(state.label);
+            Serial.println(F(" - Error at reading state!"));
             break;
         } 
 
-
+        Serial.println("");
         next_state = state.to;
     } 
     else // controller.setcurrent(<value>)

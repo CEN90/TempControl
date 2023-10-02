@@ -7,7 +7,9 @@
 #define COOLING_PORT     9
 #define SWITCH_OFF_PORT  10
 
-#define DESIRED_TEMP     21
+#define SMOOTHING         100
+
+#define DESIRED_TEMP     22
 int current_temp;
 
 void setup() {
@@ -21,7 +23,7 @@ void setup() {
 
 void loop() {
     // Start with current temp
-    current_temp = getTemperature();
+    current_temp = getTemperature(TEMP_IN);
     Serial.print("Temp: ");
     Serial.println(current_temp);
 
@@ -37,13 +39,39 @@ void loop() {
     delay(POLL_TIME);
 }
 
-float getTemperature() {
+float readSensor(int sensor) {
     // convert the ADC value to voltage in millivolt
-    float voltage = 5.0 * (analogRead(TEMP_IN) / ADC_RESOLUTION);
+    float voltage = 5.0 * (analogRead(sensor) / ADC_RESOLUTION);
 
     // convert the voltage to the temperature in Celsius
     return (voltage - 0.5) * 100;
 }
+
+int smoothInput(int sensor) {
+    int readings[SMOOTHING];
+    int total = 0;
+
+    for (size_t i = 0; i < SMOOTHING; i++)
+    {
+        readings[i] = readSensor(sensor);
+        total += readings[i];
+        delay(1);
+    }
+
+    return total / SMOOTHING;
+}
+
+int getTemperature(int sensor) {
+    return smoothInput(sensor);
+}
+
+// float getTemperature() {
+//     // convert the ADC value to voltage in millivolt
+//     float voltage = 5.0 * (analogRead(TEMP_IN) / ADC_RESOLUTION);
+
+//     // convert the voltage to the temperature in Celsius
+//     return (voltage - 0.5) * 100;
+// }
 
 void switchOffUnit() {
     digitalWrite(SWITCH_OFF_PORT, HIGH);
