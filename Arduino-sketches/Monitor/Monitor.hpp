@@ -35,21 +35,18 @@ float readSensor(int sensor) {
     return (voltage - 0.5) * 100;
 }
 
-int smoothInput(int sensor) {
-    int readings[SMOOTHING];
-    int total = 0;
+float smoothInput(int sensor) {
+    float total = 0;
 
-    for (size_t i = 0; i < SMOOTHING; i++)
-    {
-        readings[i] = readSensor(sensor);
-        total += readings[i];
+    for (size_t i = 0; i < SMOOTHING; i++) {
+        total += readSensor(sensor);
         delay(1);
     }
 
     return total / SMOOTHING;
 }
 
-int getTemperature(int sensor) {
+float getTemperature(int sensor) {
     return smoothInput(sensor);
 }
 
