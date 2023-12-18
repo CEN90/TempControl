@@ -1,0 +1,388 @@
+target Cpp {
+    fast: false,
+    threads: 1
+    //timeout: 4 sec
+};
+
+reactor Monitoring {
+	input getSense:int;
+	input comp_getSense:int;
+	input activate_h:int;
+	input activate_c:int;  
+	input switchoff:int;
+	output out_activate_h:int;
+    output out_activate_c:int;
+    output out_switchoff:int;
+    
+    state state_varValue:int[];
+    state state_timeValue:int[];
+    state varName:std::string[]("Controller.sensedValue","HC_Unit.cooler_on","HC_Unit.heater_on");
+    state labels:std::string[]("GETSENSE","ACTIVATE_C","ACTIVATE_H","SWITCHOFF");
+    state cur_state:int(0);
+    state x:int; //time in current state
+    state timingInterval:int(1);
+    state stateId_varValue:{= std::vector<std::vector<std::string> > =};
+ 
+	state state_Id:std::string[];
+	state stateId:std::string[];
+	state index:int(0);
+    state abstractTemps:std::string[];
+    state ld_states:{= std::vector<std::vector<std::string> > =};
+    state trans:{= std::vector<std::vector<std::string> > =};
+    state roundNumber:int(1);
+	
+	
+	private preamble {=  
+        #include <fstream>
+        #include <vector>
+        #include <string>
+        #include <iostream>
+        #include <stdio.h>
+
+    =}
+
+	//Loading Abstract Behavioural Model (ABM)
+	reaction (startup) {=
+		std::cout << "Loading Abstract Behavioural Model (ABM)!" << '\n';
+		std::string stateVar = "\"Controller.sensedValue\"";
+		std::vector<std::string> transitions;
+
+		std::ifstream readFile;
+		readFile.open("/Users/fmi04/runtime-EclipseXtext/roomT_GitHub/src-gen/bin/miniModel.statespace");
+
+		while(!readFile.eof()){
+
+			std::string line;
+			getline(readFile, line);
+
+			size_t foundID = line.find("id=");
+
+			size_t sPoint, ePoint;
+
+			  = line.find("id=");
+			ePoint = line.find("_");
+
+			size_t foundTransition = line.find("<transition");
+			
+			if(	foundTransition != std::string::npos){
+
+				std::string src = line;
+				size_t source = src.find("source");
+				size_t endSource = src.find("_");
+				std::string srcNumber = src.substr(source+8, endSource-source-8);
+
+				std::string dest = line;
+				size_t destination = dest.find("destination=");
+				size_t endDestination = dest.find("executionTime");
+				std::string destNumber = dest.substr(destination+13, endDestination-destination-17);
+
+				if(source != std::string::npos && destNumber != srcNumber){
+					transitions.push_back(line);
+				}
+			
+			}
+
+			if(	foundID != std::string::npos){
+
+				std::string case_Id = line.substr(sPoint+4, (ePoint-sPoint-4));
+				//std::cout << case_Id << "\n";
+				state_Id.push_back(case_Id);
+
+				bool finishedState = false;
+
+				while(!finishedState){
+
+					getline(readFile, line);
+					size_t foundStateVar = line.find(stateVar);
+					size_t foundEndLine = line.find("</statevariables>");					
+
+					if(	foundStateVar != std::string::npos){
+
+						size_t startPoint, endPoint;
+
+						startPoint = line.find(">");
+						endPoint = line.find("</");
+
+						std::string result = line.substr(startPoint+1, (endPoint-startPoint-1));
+						abstractTemps.push_back(result);
+					}
+
+					if(	foundEndLine != std::string::npos){
+						finishedState = true;
+					}
+
+				}
+
+			}
+			
+			size_t foundVar = line.find(varName[0]);
+			if(	foundVar != std::string::npos){
+				size_t sVarPoint, eVarPoint;
+				sVarPoint = line.find("\">");
+				eVarPoint = line.find("<");
+				std::string varValue = line.substr(sVarPoint+2, eVarPoint-1);
+				//std::cout << varValue << "\n";
+				state_varValue.push_back(stoi(varValue));
+			}
+			 
+			size_t getTime = line.find("</now>");
+			if(	getTime != std::string::npos){
+				size_t sTimePoint, eTimePoint; 
+				sTimePoint = line.find(">");
+				eTimePoint = line.find("</");
+				std::string timeValue = line.substr(sTimePoint+1, (eTimePoint-sTimePoint-1));
+				//std::cout << timeValue << "\n";
+				state_timeValue.push_back(stoi(timeValue));
+			}
+			
+            
+			
+
+		}
+
+		std::vector<std::vector<std::string> > edges(state_Id.size());
+		std::vector<std::vector<std::string> > commands(state_Id.size());
+
+		for(int i = 0; i < transitions.size(); i++){
+
+			std::string trans = transitions[i];
+
+			size_t source = trans.find("source");
+			size_t endSource = trans.find("_");
+			std::string srcNumber = trans.substr(source+8, endSource-source-8);
+
+			size_t destination = trans.find("destination=");
+			size_t endDestination = trans.find("executionTime");
+			std::string destNumber = trans.substr(destination+13, endDestination-destination-17);
+
+			std::string tranTime;
+			size_t startTimeTrans = trans.find("<time value=");
+			size_t endTimeTrans = trans.find("/>");
+			if(startTimeTrans != std::string::npos){
+				tranTime = trans.substr(startTimeTrans+13, endTimeTrans-startTimeTrans-14);
+			} 
+			
+			size_t startTitle = trans.find("title=");
+			size_t endTitle = trans.find("/>");
+			std::string title = trans.substr(startTitle+7, endTitle-startTitle-8);
+			
+
+			for(int j = 0; j < state_Id.size(); j++){
+
+				if(state_Id[j] == srcNumber){
+					edges[j].push_back(destNumber);
+					if(startTimeTrans != std::string::npos){ 
+                        commands[j].push_back("TIME_ADVANCES_" + tranTime + "_UNIT"); 
+                        break;
+                    } else {
+                       	commands[j].push_back(title);
+						break;
+                    }
+
+				}
+
+			}
+
+		}
+
+		//for(int i = 0; i < abstractTemps.size(); i++){
+		//	std::cout << state_Id[i] << '\t' << abstractTemps[i] << '\n';
+		//} 
+
+		for(int i = 0; i < edges.size(); i++){
+			std::cout << state_Id[i] << "\t";
+			for(int j = 0 ; j < edges[i].size(); j++)
+				if(j>0) {
+                    std::cout << state_Id[i] << "\t" << commands[i][j] << "\t" <<  edges[i][j] << '\n';
+                    stateId.push_back(state_Id[i]);
+                }else {
+                    std::cout << commands[i][j] << "\t" <<  edges[i][j] << '\n';
+                    stateId.push_back(state_Id[i]);
+                }
+			//std::cout << '\n';
+		}
+		
+		
+		
+
+		trans = commands;
+		ld_states = edges;
+		x = state_timeValue[cur_state];
+		
+		/* 
+		for(int i = 0; i < stateId.size(); i++){std::cout <<  " stateId[i] " << stateId[i] << '\n';}
+		for(int i = 0; i < ld_states.size(); i++){std::cout <<  " ld_states[i][0] " << ld_states[i][0]<<'\n';}
+		for(int i = 0; i < trans.size(); i++){std::cout <<  " trans[i][0] " << trans[i][0]<<'\n';}
+		for(int i = 0; i < state_varValue.size(); i++){std::cout <<  " state_varValue[i] " << state_varValue[i]<<'\n';}
+		for(int i = 0; i < state_Id.size(); i++){std::cout <<  " state_Id[i] " << state_Id[i]<<'\n';}
+		for(int i = 0; i < stateId.size(); i++){std::cout <<  " stateId[i] " << stateId[i]<<'\n';}
+		*/
+	=}
+	
+	reaction(comp_getSense,getSense) {= 
+		bool equal = false;
+        index = 0;
+        if(*getSense.get() == *comp_getSense.get()){
+            auto elapsed_time = get_elapsed_logical_time();
+			auto elapsed_secs = std::chrono::duration_cast<std::chrono::seconds>(elapsed_time);
+            long current_time = elapsed_secs.count();
+            if(current_time == (x + timingInterval)) {
+                for(int j = 0 ; j < ld_states[cur_state].size(); j++){
+					for(int i = 0; i < state_Id.size(); i++){
+                        //std::cout << "ld_states[cur_state][j] is " << ld_states[cur_state][j] << " and state_Id[i] is " << state_Id[i] << " and i is" << i << " state_varValue[i] is " << state_varValue[i] <<"\n";
+                        if(ld_states[cur_state][j] == state_Id[i]){
+                           if(state_varValue[i] == *comp_getSense.get()){
+                				equal = true;
+                				index = i;	
+                            }
+                        } 		
+                    }
+                    if(equal == true){
+                       break; 
+                    }   	 
+                }
+                
+            }
+        }
+       if(equal != true){
+         std::cout << "ALARM:FALSE_DATA" << "\n"; 
+         exit(0);
+       }
+       cur_state = index;  
+       if(trans[cur_state][0].find("TIME")!= std::string::npos){
+        	x = x + timingInterval;
+       		cur_state = cur_state + 1;
+    	}
+    =}
+
+	reaction(activate_c,activate_h,switchoff) -> out_activate_c, out_activate_h, out_switchoff {=
+        bool equal = false;
+        auto elapsed_time = get_elapsed_logical_time();
+		auto elapsed_secs = std::chrono::duration_cast<std::chrono::seconds>(elapsed_time);
+        long current_time = elapsed_secs.count();
+
+        if(activate_c.is_present()){
+            if(current_time == (x + timingInterval)){
+				if(trans[cur_state][0] == labels[1]){
+					for(int i = 0; i < state_Id.size(); i++){ 
+							if(ld_states[cur_state][0] == state_Id[i]){
+								equal = true;
+								index = i;
+							}
+					}
+				}
+				if(equal != true){
+					std::cout << "ALARM:FALSE_COMMAND_C" << "\n"; 
+					exit(0);
+				}
+       		}
+       		cur_state = index; 
+       		out_activate_c.set(1);
+        } else if(activate_h.is_present()){
+            if(cur_state == 10) {
+            } else if(current_time == (x + timingInterval)){
+				if(trans[cur_state][0] == labels[2]){
+					for(int i = 0; i < state_Id.size(); i++){  
+							if(ld_states[cur_state][0] == state_Id[i]){
+									equal = true;
+									index = i;
+							}
+					}
+				}
+				if(equal != true){
+					std::cout << "ALARM:FALSE_COMMAND_H" << "\n";
+					exit(0); 
+				}
+       		}
+       		out_activate_h.set(1);
+        } else if(switchoff.is_current_time()){
+            if(current_time == (x + timingInterval)){
+				if(trans[cur_state][0] == labels[3]){
+					for(int i = 0; i < state_Id.size(); i++){ 
+							if(ld_states[cur_state][0] == state_Id[i]){
+								equal = true;
+								index = i;
+							}
+					}
+				}
+				if(equal != true){
+					std::cout << "ALARM:FALSE_COMMAND_OFF" << "\n";
+					exit(0); 
+				}
+       	}
+       		
+			out_switchoff.set(1);
+        }
+		
+		if(cur_state != 10) {     
+			cur_state = index; 
+			
+			if(trans[cur_state][0].find("TIME")!= std::string::npos){
+				x = x + timingInterval;
+				cur_state = cur_state + 1;
+			}	
+		}
+    =}
+    
+    
+    
+    //reaction(activate_h) -> out_activate_h {=
+        //out_activate_h.set(1);
+    //=}
+    //reaction(switchoff) -> out_switchoff {=
+    //    out_switchoff.set(1);
+   // =}
+    
+    //reaction(comp_getSense) {= =}
+	/* 
+	//Identify Mismatch
+	reaction(activate_h,activate_c,switchoff) -> out_activate_h, out_activate_c, out_switchoff {=
+		
+		if(*activate_h.get()){ out_activate_h.set(1);} 
+		else if(*activate_c.get()){out_activate_c.set(-1);}
+		else if(*switchoff.get()) {out_switchoff.set(0);}
+        
+		
+		if(*activate_h.get() == 0 || *activate_c.get() == 0){
+        } else if(*activate_h.get() == 1)  out_activate_h.set(1);
+          else if(*activate_c.get() == -1) out_activate_c.set(1);
+
+        bool Alarm = true;
+
+        for(int i = 0; i < abstractTemps.size(); i++){
+
+        	std::stringstream ss1(abstractTemps[i]);
+			int abstractSensedData;
+			ss1 >> abstractSensedData;
+
+        	if(abstractSensedData == *getSense.get()){
+        		for(int j = 0; j < trans[i].size(); j++){
+
+        			if( (trans[i][j] == "HEAT" && *activate_h.get() == 1) | (trans[i][j] == "COOL" && *activate_c.get() == -1) | (trans[i][j] == "SENSE" && *activate_h.get() == 0)){
+        				Alarm = false;
+        				break;
+        			}			
+        		}
+        	}
+
+        }
+
+        if(Alarm == true){
+        	std::cout << "Alarm: 1 at Round:" << roundNumber << '\n';
+        	std::cout << *getSense.get() << " & " << *activate_h.get() << '\n';
+
+       	
+       		std::ofstream writeFile;
+			writeFile.open("log.txt" , std::ios::app);
+
+			writeFile << "Alarm: 1 at Round:" << roundNumber << '\n';
+			writeFile.close();			
+
+        }
+
+        roundNumber++;
+		
+	=}
+	*/
+	
+}	

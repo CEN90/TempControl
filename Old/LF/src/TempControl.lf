@@ -1,0 +1,86 @@
+target C;
+
+reactor Controller {
+    input currentTemp: int
+    output heating: bool
+    output cooling: bool
+    output switchoff: bool
+
+    state desiredValue: int = 21
+
+    reaction(currentTemp) -> heating, cooling, switchoff {=
+        printf("Current temp is %d: ", currentTemp->value);
+
+        if (currentTemp->value == self->desiredValue) 
+            lf_set(switchoff, true);
+
+        if (currentTemp->value < self->desiredValue) 
+            lf_set(heating, true); 
+        
+        if (currentTemp->value > self->desiredValue) 
+            lf_set(cooling, true);
+    =}
+
+}
+
+reactor Sensor {
+    input sensedTemp: int
+    output currentTemp: int
+
+    reaction(sensedTemp) -> currentTemp {= lf_set(currentTemp, sensedTemp->value); =}
+}
+
+reactor Room {
+    input cooling: int
+    input heating: int
+    output temperature: int
+    state currentTemp: int = 22
+    timer poll(0, 1 sec)
+
+    reaction(poll) -> temperature {=
+        if (self->currentTemp == 21) 
+            self->currentTemp -= rand() % 2; // randomly set window to open or close
+        
+        lf_set(temperature, self->currentTemp);
+    =}
+
+    reaction(cooling) {= self->currentTemp -= 1; =}
+    reaction(heating) {= self->currentTemp += 1; =}
+}
+
+reactor HC_Unit {
+    input heaterOn: bool
+    input coolerOn: bool
+    input switchoff: bool
+    output heating: int
+    output cooling: int
+
+    reaction(heaterOn) -> heating {= 
+        lf_set(heating, 1);
+        printf("Activating heating\n");
+     =}
+
+    reaction(coolerOn) -> cooling {= 
+        lf_set(cooling, 1);
+        printf("Activating cooling\n");
+    =}
+
+    reaction(switchoff) -> heating, cooling {= printf("Switching off\n"); =}
+}
+
+main reactor {
+    controller = new Controller();
+    sensor = new Sensor();
+    room = new Room();
+    hc_unit = new HC_Unit();
+
+    room.temperature -> sensor.sensedTemp after 1 sec
+    sensor.currentTemp -> controller.currentTemp
+
+    controller.heating -> hc_unit.heaterOn
+    controller.cooling -> hc_unit.coolerOn
+    controller.switchoff -> hc_unit.switchoff
+
+    hc_unit.heating -> room.heating
+    hc_unit.cooling -> room.cooling 
+}

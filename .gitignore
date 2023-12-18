@@ -11,6 +11,16 @@
 progress
 execute
 build/*
+Old/build/*
+
+Old/LF/bin/*
+Old/LF/lib/*
+Old/LF/out/*
+Old/LF/share/*
+Old/LF/build/*
+Old/LF/include/*
+Old/LF/src-gen/*
+Old/LF/lib64/*
 
 LF/bin/*
 LF/lib/*
