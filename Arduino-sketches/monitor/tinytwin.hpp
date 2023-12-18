@@ -41,11 +41,10 @@ struct input_t {
     }
 };
 
-// NOT UPPDATED!
 state_input_t expected_inputs[4] = {
-    { controller_setcurrent, 4, { 8, 9, 11, 14 } },
-    { hc_unit_switchoff, 3, { 0, 1, 3 } },
-    { hc_unit_setheating, 1, { 6 } },
+    { controller_setcurrent, 3, { 0, 1, 2 } },
+    { hc_unit_switchoff, 1, { 0 } },
+    { hc_unit_setheating, 1, { 1 } },
     { hc_unit_setcooling, 1, { 2 }},
 };
 
@@ -55,7 +54,6 @@ String output_strings[4] = {
     "Turned on heating"
     "Turned on cooling",
 };
-
 
 void setPins() {
     for (size_t i = 0; i < input_pins_len; i++) {
