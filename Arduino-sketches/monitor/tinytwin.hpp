@@ -16,7 +16,7 @@ constexpr int COOLING = PIN2;
 constexpr int input_pins_len = 4;
 constexpr int input_pins[input_pins_len] = { TEMP_MAIN, TEMP_AUX, HEATING, COOLING };
 
-TMP36 temp_main(TEMP_MAIN, 5.0); 
+TMP36 temp_main(TEMP_MAIN, 5.0); // 5.0 volt sensor
 TMP36 temp_aux(TEMP_AUX, 5.0); 
 
 struct state_input_t {
@@ -67,6 +67,8 @@ void readInputs(input_t *prev) {
         result += digitalRead(input_pins[i]) << i;
     }
 
+    // Lägg till temp-läsning här!
+
     if (prev->commands = result) {
         prev->unchanged = true;
     } else {
@@ -84,6 +86,8 @@ boolean is_expected_input(input_t current, state_input_t state) {
             match = true;
         }
     }
+
+    // Lägg till matchning av temp_main & temp_aux här!
 
     return match;
 }
