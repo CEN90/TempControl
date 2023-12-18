@@ -5,6 +5,11 @@ constexpr int ERROR_STATE = -1;
 constexpr int POLL_TIME = 10;
 
 
+template <typename T>
+Print& operator<<(Print& printer, T value) {
+    printer.print(value);
+    return printer;
+}
 
 void error(int current_state) {
     int s = transitions[current_state][Label];
@@ -15,20 +20,8 @@ void error(int current_state) {
     Serial.println(F("Failed to match input to a state, entering following mode instead!\n"));
 }
 
-void setPins() {
-    for (size_t i = 0; i < input_pins_len; i++) {
-        pinMode(input_pins[i], INPUT);
-    }
-}
-
-// void printInput(int input) {
-//     Serial.print("Input: ");
-//     Serial.println(input);
-// }
-
 void printInput(input_t input) {
-    Serial.print("Input: ");
-    Serial.println(input.commands);
+    input.print();
 }
 
 void printState(int state) {
@@ -37,12 +30,6 @@ void printState(int state) {
 
 void printStateOutput(int state) {
     Serial.println(output_strings[state] + "\n");
-}
-
-template <typename T>
-Print& operator<<(Print& printer, T value) {
-    printer.print(value);
-    return printer;
 }
 
 void printPossibleChoices(int current, int start, int len) { 

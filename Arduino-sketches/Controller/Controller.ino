@@ -1,3 +1,5 @@
+#include <TMP36.h>
+
 #define ATTACK           0
 
 #define ADC_RESOLUTION   1024.0

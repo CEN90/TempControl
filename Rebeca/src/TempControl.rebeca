@@ -1,13 +1,11 @@
 // Temperature constants
-env int desiredTemp_const = 22;
+env int desiredTemp_const = 25;
 
 // thresholds for heating
-env int thresh_heat_low = 15;
-env int thresh_heat_high = 21;
+env int thresh_heat = 24;
 
 // thresholds for cooling
-env int thresh_cool_low = 23;
-env int thresh_cool_high = 30;
+env int thresh_cool = 26;
 
 // Polling constants
 env int SENSOR_DELAY = 2;
@@ -36,21 +34,21 @@ reactiveclass Controller(5) {
     }
 
     msgsrv updateOutput() {
-        if (currentTemp >= thresh_heat_high && currentTemp <= thresh_cool_low) {
+        if (currentTemp == desiredTemp_const) {
             if (isCooling || isHeating) {
                 hc_unit.switchoff();
                 isCooling = false;
                 isHeating = false;
             }
         }
-        else if (currentTemp > thresh_heat_low && currentTemp < thresh_heat_high) {
+        else if (currentTemp < desiredTemp_const) {
             if (!isHeating) {
                 hc_unit.setHeating();
                 isHeating = true;
                 isCooling = false;
             }
         }
-        else if (currentTemp > thresh_cool_low && currentTemp < thresh_cool_high) {
+        else if (currentTemp > desiredTemp_const) {
             if (!isCooling) {
                 hc_unit.setCooling();
                 isCooling = true;
@@ -93,6 +91,11 @@ reactiveclass Room(5) {
         currentTemp = desiredTemp_const;
         currentRegulation = 0;
         outside_air = 0;
+        self.start();
+    }
+
+    msgsrv start() {
+        currentTemp = ?(20, 21, 22, 23, 24, 25, 26);
         self.updateStatus();
     }
 

@@ -40,11 +40,17 @@ void loop() {
     }
     
     // Do nothing if pin states is same
-    if (read_inputs == prev_inputs && !tau) {
+    // if (read_inputs == prev_inputs && !tau) {
+    //     delay(POLL_TIME);
+    //     return;
+    // }
+
+    // Do nothing if pin states is same
+    if (input.unchanged && !tau) {
         delay(POLL_TIME);
         return;
     }
-        
+    
     // If error then just print out input for logging purposes
     if (next_state == ERROR_STATE) {
         follow();
@@ -94,20 +100,11 @@ int compare(int start, int len) {
             tau = false;
         }
 
-        if (is_expected_input(input, expected_inputs[state_label]))
-        {
+        if (is_expected_input(input, expected_inputs[state_label])) {
             printState(state_label);
             printStateOutput(state_label);
             is_match = true;
         }
-        
-        // for (size_t j = 0; j < inputs_len; j++) {
-        //     if (read_inputs == expected_inputs[state_label].valid_inputs[j]) {
-        //         printState(state_label);
-        //         printStateOutput(state_label);
-        //         is_match = true;
-        //     }
-        // }
 
         if (is_match) {
             return transition_to;
@@ -124,6 +121,5 @@ int compare(int start, int len) {
 void follow() {
     Serial.print("Input recorded: ");
     printInput(input);
-    // printInput(read_inputs);
     Serial.println("");
 }
