@@ -1,0 +1,6 @@
+5
+other
+controller.setcurrent
+hc_unit.setcooling
+hc_unit.setheating
+hc_unit.switchoff

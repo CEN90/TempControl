@@ -7,7 +7,7 @@
 *.exe
 *.xml
 *.json
-*.txt
+Old/out/*/*.txt
 progress
 execute
 build/*
@@ -33,3 +33,5 @@ LF/lib64/*
 .project
 CMakeLists.txt
 .lf-cpp-marker
+
+Rebeca/statespaces/tau_transitions.txt
