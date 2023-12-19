@@ -1,5 +1,8 @@
 #include "states.hpp"
-#include <TMP36.h>
+#include <Wire.h>
+
+constexpr int SENSOR = 2;
+constexpr int SENSOR_DATA_SIZE = 2;
 
 // Input Arduino Uno
 constexpr int TEMP_MAIN = PIN_A0;
@@ -16,8 +19,8 @@ constexpr int COOLING = PIN2;
 constexpr int input_pins_len = 4;
 constexpr int input_pins[input_pins_len] = { TEMP_MAIN, TEMP_AUX, HEATING, COOLING };
 
-TMP36 temp_main(TEMP_MAIN, 5.0); // 5.0 volt sensor
-TMP36 temp_aux(TEMP_AUX, 5.0); 
+int temp_main = 0;
+int temp_aux = 0;
 
 struct state_input_t {
     int state;
@@ -59,6 +62,17 @@ void setPins() {
     for (size_t i = 0; i < input_pins_len; i++) {
         pinMode(input_pins[i], INPUT);
     }
+
+    Wire.begin();
+}
+
+void readTemp(input_t *input) {
+    Wire.requestFrom(SENSOR, SENSOR_DATA_SIZE);
+
+    while (Wire.available()) { // peripheral may send less than requested
+        input->temp_main = Wire.read(); // receive a byte as character
+        input->temp_aux = Wire.read(); // receive a byte as character
+    }    
 }
 
 void readInputs(input_t *prev) {
@@ -68,6 +82,7 @@ void readInputs(input_t *prev) {
     }
 
     // Lägg till temp-läsning här!
+    readTemp(prev);
 
     if (prev->commands = result) {
         prev->unchanged = true;
