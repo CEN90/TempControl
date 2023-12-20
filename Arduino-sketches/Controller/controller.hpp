@@ -33,13 +33,12 @@ enum attacks_t {
     none
 };
 
-
 // Description for attacks
 String attack_labels[ATTACKS_LEN] = {
     "Blocking signal to heating element.",
     "Blocking signal to cooling fan.",
     "Blocking shutdown mechanism.",
-    "Turning on both heating element and cooling fan.",
+    "Both heater and fan",
 };
 
 attacks_t current_attack = none;
@@ -47,6 +46,10 @@ attacks_t current_attack = none;
 boolean is_current_attack(attacks_t attack) {
     return current_attack == attack;
 }
+
+void switchOffUnit();
+void setHeating();
+void setCooling();
 
 void hacked() {
     Serial.println(F("Oh, no. I've been hacked!"));
@@ -84,6 +87,10 @@ void setPins() {
     pinMode(ATTACK_BUTTON, INPUT_PULLUP);
 }
 
+/*
+    Relay used is active low, meaning LOW turns on the relay!
+*/
+
 void switchOffUnit() {
     digitalWrite(SWITCH_OFF_LED, HIGH);
     digitalWrite(HEATING_LED, LOW);
@@ -91,14 +98,14 @@ void switchOffUnit() {
 
     // Set both low if not attack
     if (!is_current_attack(block_shutdown)) {
-        digitalWrite(HEATING_ELEMENT, LOW);
-        digitalWrite(COOLING_FAN, LOW);
+        digitalWrite(HEATING_ELEMENT, HIGH); // active low
+        digitalWrite(COOLING_FAN, HIGH); // active low
     }
 
     // Set both high if attack
     if (is_current_attack(both_heat_cool)) {
-        digitalWrite(HEATING_ELEMENT, HIGH);
-        digitalWrite(COOLING_FAN, HIGH);
+        digitalWrite(HEATING_ELEMENT, LOW); // active low
+        digitalWrite(COOLING_FAN, LOW); // active low
     }
 }
 
@@ -109,10 +116,10 @@ void setHeating() {
 
     // Set heating high if not attack
     if (!is_current_attack(block_heating)) {
-        digitalWrite(HEATING_ELEMENT, HIGH);
+        digitalWrite(HEATING_ELEMENT, LOW); // active low
     }
 
-    digitalWrite(COOLING_FAN, LOW);    
+    digitalWrite(COOLING_FAN, HIGH); // active low    
 }
 
 void setCooling() {
@@ -122,8 +129,8 @@ void setCooling() {
 
     // Set fan high if not attack
     if (!is_current_attack(block_cooling)) {
-        digitalWrite(COOLING_FAN, HIGH);
+        digitalWrite(COOLING_FAN, LOW); // active low
     }
 
-    digitalWrite(HEATING_ELEMENT, LOW);
+    digitalWrite(HEATING_ELEMENT, HIGH); // active low
 }

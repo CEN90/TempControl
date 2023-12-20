@@ -49,8 +49,13 @@ int getTemperature() {
         aux = Wire.read(); 
     }    
 
+    // Serial.print("main: ");
+    // Serial.print(main);
+    // Serial.print(" aux: ");
+    // Serial.println(aux);
+
     if (aux >= SHUTOFF_TEMP) {
-        emergency_shutoff();
+        emergencyswitchoff();
     }
 
     return main;
