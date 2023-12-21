@@ -7,6 +7,10 @@ env int thresh_heat = 24;
 // thresholds for cooling
 env int thresh_cool = 26;
 
+// Hard boundaries
+env int MAX_TEMP = 30;
+env int MIN_TEMP = 20;
+
 // Polling constants
 env int SENSOR_DELAY = 2;
 env int ROOM_DELAY = 10;
