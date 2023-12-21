@@ -28,6 +28,7 @@ void setup() {
     next_state = start_state;
 
     Serial.println(F("Ready to start monitor now"));
+    firstRead();
 }
 
 void loop() {   
@@ -53,7 +54,7 @@ void loop() {
     
     // If error then just print out input for logging purposes
     if (next_state == ERROR_STATE) {
-        follow();
+        // follow();
         delay(POLL_TIME);
         prev_inputs = read_inputs;
         return;
@@ -75,6 +76,12 @@ void loop() {
     
     prev_inputs = read_inputs;
     delay(POLL_TIME);
+}
+
+void firstRead(){
+    readInputs(&input);
+    Serial.print("Temp is ");
+    Serial.println(input.temp_main);
 }
 
 // Match input with possible transitions in current state
@@ -100,7 +107,7 @@ int compare(int start, int len) {
             tau = false;
         }
 
-        if (is_expected_input(input, expected_inputs[state_label])) {
+        if (is_expected_input(input, expected_inputs[state_label], start + i)) {
             printState(state_label);
             printStateOutput(state_label);
             is_match = true;

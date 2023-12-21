@@ -5,19 +5,19 @@ constexpr int SENSOR = 2;
 constexpr int SENSOR_DATA_SIZE = 2;
 
 // Input Arduino Uno
-constexpr int TEMP_MAIN = PIN_A0;
-constexpr int TEMP_AUX = PIN_A1;
-constexpr int HEATING = PIN3;
-constexpr int COOLING = PIN2;
+// constexpr int TEMP_MAIN = PIN_A0;
+// constexpr int TEMP_AUX = PIN_A1;
+// constexpr int HEATING = PIN3;
+// constexpr int COOLING = PIN2;
 
 // Input Arduino Mega pinout
 // constexpr int TEMP_MAIN = PIN4;
 // constexpr int TEMP_AUX = PIN4;
-// constexpr int HEATING = PIN3;
-// constexpr int COOLING = PIN2;
+constexpr int HEATING = 13;
+constexpr int COOLING = 12;
 
-constexpr int input_pins_len = 4;
-constexpr int input_pins[input_pins_len] = { TEMP_MAIN, TEMP_AUX, HEATING, COOLING };
+constexpr int input_pins_len = 2;
+constexpr int input_pins[input_pins_len] = { HEATING, COOLING };
 
 int temp_main = 0;
 int temp_aux = 0;
@@ -78,13 +78,16 @@ void readTemp(input_t *input) {
 void readInputs(input_t *prev) {
     int result = 0;
     for (int i = 0; i < input_pins_len; i++) {
-        result += digitalRead(input_pins[i]) << i;
+        result += !digitalRead(input_pins[i]) << i; // active low for relay
     }
+
+    int prev_temp_main = prev->temp_main;
+    int prev_temp_aux = prev->temp_aux;
 
     // Lägg till temp-läsning här!
     readTemp(prev);
 
-    if (prev->commands = result) {
+    if (prev->commands == result && prev_temp_main == prev->temp_main) {
         prev->unchanged = true;
     } else {
         prev->commands = result;
@@ -93,7 +96,7 @@ void readInputs(input_t *prev) {
     
 }
 
-boolean is_expected_input(input_t current, state_input_t state) {
+boolean is_expected_input(input_t current, state_input_t state, int current_state) {
     boolean match = false;
     
     for (size_t i = 0; i < state.inputs_len; i++) {
@@ -102,7 +105,13 @@ boolean is_expected_input(input_t current, state_input_t state) {
         }
     }
 
+    int value = transitions[current_state][Value];
+
     // Lägg till matchning av temp_main & temp_aux här!
+    if (value != -1 && value != current.temp_main) {
+        match = false;
+    }
+    
 
     return match;
 }
