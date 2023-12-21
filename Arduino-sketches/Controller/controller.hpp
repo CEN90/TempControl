@@ -17,7 +17,7 @@
 #define SENSOR           2
 #define SENSOR_DATA_SIZE 2
 
-#define ATTACKS_LEN      4
+#define ATTACKS_LEN      5
 #define ATTACK_BUTTON    13
 
 // Temp definitions
@@ -30,6 +30,7 @@ enum attacks_t {
     block_cooling,
     block_shutdown,
     both_heat_cool,
+    switch_output,
     none
 };
 
@@ -39,6 +40,7 @@ String attack_labels[ATTACKS_LEN] = {
     "Blocking signal to cooling fan.",
     "Blocking shutdown mechanism.",
     "Both heater and fan",
+    "Switch fan and heater output"
 };
 
 attacks_t current_attack = none;
@@ -114,12 +116,19 @@ void setHeating() {
     digitalWrite(HEATING_LED, HIGH);
     digitalWrite(COOLING_LED, LOW);
 
-    // Set heating high if not attack
+    // If not block output attack
     if (!is_current_attack(block_heating)) {
         digitalWrite(HEATING_ELEMENT, LOW); // active low
     }
 
     digitalWrite(COOLING_FAN, HIGH); // active low    
+
+    // If attack is switch output
+    if (!is_current_attack(switch_output)) {
+        digitalWrite(COOLING_FAN, LOW); // active low    
+        digitalWrite(HEATING_ELEMENT, HIGH); // active low
+    }
+    
 }
 
 void setCooling() {
@@ -127,10 +136,16 @@ void setCooling() {
     digitalWrite(HEATING_LED, LOW);
     digitalWrite(COOLING_LED, HIGH);
 
-    // Set fan high if not attack
+    // If not block output attack
     if (!is_current_attack(block_cooling)) {
         digitalWrite(COOLING_FAN, LOW); // active low
     }
 
     digitalWrite(HEATING_ELEMENT, HIGH); // active low
+
+    // If attack is switch output
+    if (!is_current_attack(switch_output)) {
+        digitalWrite(COOLING_FAN, HIGH); // active low    
+        digitalWrite(HEATING_ELEMENT, LOW); // active low
+    }
 }
