@@ -33,6 +33,12 @@ reactiveclass Controller(5) {
     }
 
     msgsrv setCurrent(int value) {
+        if (value != currentTemp) {
+            self.updateTemp(value);
+        }
+    }
+
+    msgsrv updateTemp(int value) {
         currentTemp = value;
         self.updateOutput();
     }
@@ -68,7 +74,12 @@ reactiveclass Sensor(5) {
         Controller controller;
     }
 
+    statevars {
+        int prev_temp;
+    }
+
     Sensor() {
+        prev_temp = 0;
         self.callSensor();
     }
 

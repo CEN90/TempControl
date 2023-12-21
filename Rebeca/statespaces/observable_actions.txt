@@ -1,1 +1,1 @@
-hc_unit.setheating,hc_unit.setcooling,controller.setcurrent,hc_unit.switchoff,(
+hc_unit.setheating,hc_unit.setcooling,controller.updatetemp,hc_unit.switchoff,(
