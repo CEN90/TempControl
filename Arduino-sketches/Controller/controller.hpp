@@ -124,7 +124,7 @@ void setHeating() {
     digitalWrite(COOLING_FAN, HIGH); // active low    
 
     // If attack is switch output
-    if (!is_current_attack(switch_output)) {
+    if (is_current_attack(switch_output)) {
         digitalWrite(COOLING_FAN, LOW); // active low    
         digitalWrite(HEATING_ELEMENT, HIGH); // active low
     }
@@ -144,7 +144,7 @@ void setCooling() {
     digitalWrite(HEATING_ELEMENT, HIGH); // active low
 
     // If attack is switch output
-    if (!is_current_attack(switch_output)) {
+    if (is_current_attack(switch_output)) {
         digitalWrite(COOLING_FAN, HIGH); // active low    
         digitalWrite(HEATING_ELEMENT, LOW); // active low
     }

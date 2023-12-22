@@ -13,8 +13,8 @@ constexpr int SENSOR_DATA_SIZE = 2;
 // Input Arduino Mega pinout
 // constexpr int TEMP_MAIN = PIN4;
 // constexpr int TEMP_AUX = PIN4;
-constexpr int HEATING = 13;
-constexpr int COOLING = 12;
+constexpr int COOLING = 13;
+constexpr int HEATING = 12;
 
 constexpr int input_pins_len = 2;
 constexpr int input_pins[input_pins_len] = { HEATING, COOLING };
@@ -45,23 +45,25 @@ struct input_t {
 };
 
 state_input_t expected_inputs[4] = {
-    { controller_setcurrent, 3, { 0, 1, 2 } },
-    { hc_unit_switchoff, 1, { 0 } },
+    { controller_updatetemp, 3, { 0, 1, 2 } },
     { hc_unit_setheating, 1, { 1 } },
     { hc_unit_setcooling, 1, { 2 }},
+    { hc_unit_switchoff, 1, { 0 } },
 };
 
 String output_strings[4] = {
     "Read temperature",
-    "Turned off hc-unit",
-    "Turned on heating"
+    "Turned on heating",
     "Turned on cooling",
+    "Turned off hc-unit",
 };
 
 void setPins() {
     for (size_t i = 0; i < input_pins_len; i++) {
         pinMode(input_pins[i], INPUT);
     }
+
+    delay(2000);
 
     Wire.begin();
 }
@@ -87,6 +89,7 @@ void readInputs(input_t *prev) {
     // Lägg till temp-läsning här!
     readTemp(prev);
 
+    // if (prev->commands == result) {
     if (prev->commands == result && prev_temp_main == prev->temp_main) {
         prev->unchanged = true;
     } else {
@@ -105,10 +108,10 @@ boolean is_expected_input(input_t current, state_input_t state, int current_stat
         }
     }
 
+    transition_labels label = transitions[current_state][Label];
     int value = transitions[current_state][Value];
 
-    // Lägg till matchning av temp_main & temp_aux här!
-    if (value != -1 && value != current.temp_main) {
+    if (label == controller_updatetemp && value != current.temp_main) {
         match = false;
     }
     

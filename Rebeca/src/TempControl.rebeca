@@ -29,7 +29,8 @@ reactiveclass Controller(5) {
     Controller() {
         isCooling = false;
         isHeating = false;
-        currentTemp = desiredTemp_const; // Start off with desired
+        currentTemp = 0; // Start off with desired
+        // currentTemp = desiredTemp_const; // Start off with desired
     }
 
     msgsrv setCurrent(int value) {
@@ -110,7 +111,7 @@ reactiveclass Room(5) {
     }
 
     msgsrv start() {
-        currentTemp = ?(20, 21, 22, 23, 24, 25, 26);
+        currentTemp = ?(21, 22, 23, 24, 25);
         self.updateStatus();
     }
 

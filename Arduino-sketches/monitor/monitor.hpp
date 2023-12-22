@@ -24,8 +24,9 @@ void printInput(input_t input) {
     input.print();
 }
 
-void printState(int state) {
-    Serial.print(labels_string[state] + ": ");
+void printState(int transition, int state) {
+    Serial.print(transition);
+    Serial.print(" -> " + labels_string[state] + ": ");
 }
 
 void printStateOutput(int state) {

@@ -12,7 +12,7 @@ boolean tau = false;
 
 int read_inputs = 0;
 int prev_inputs = 0;
-input_t input = { 0, 0, 0, false };
+input_t input = { 0, 0, 0, true };
 
 int current_state = 0;
 int next_state = 0;
@@ -28,7 +28,7 @@ void setup() {
     next_state = start_state;
 
     Serial.println(F("Ready to start monitor now"));
-    firstRead();
+    // firstRead();
 }
 
 void loop() {   
@@ -39,12 +39,6 @@ void loop() {
     if (timer_on && timer < millis()) {
         Serial.println(F("Time ran out"));
     }
-    
-    // Do nothing if pin states is same
-    // if (read_inputs == prev_inputs && !tau) {
-    //     delay(POLL_TIME);
-    //     return;
-    // }
 
     // Do nothing if pin states is same
     if (input.unchanged && !tau) {
@@ -101,14 +95,14 @@ int compare(int start, int len) {
 
         if (inputs_len == 0) {
             tau = true;
-            is_match = true;
+            // is_match = true;
             Serial.println(F("Encountered a tau transition"));
         } else {
             tau = false;
         }
 
         if (is_expected_input(input, expected_inputs[state_label], start + i)) {
-            printState(state_label);
+            printState(transition_to, state_label);
             printStateOutput(state_label);
             is_match = true;
         }
