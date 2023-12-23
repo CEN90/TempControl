@@ -48,10 +48,7 @@ reactiveclass Controller(5) {
     msgsrv updateOutput() {
         boolean isDesiredRange = currentTemp >= THRESHOLD_LOW && currentTemp <= THRESHOLD_HIGH;
         boolean tempHighHeating = currentTemp >= THRESHOLD_HIGH && isHeating;
-        boolean tempLowCooling = currentTemp <= THRESHOLD_LOW && isCooling;
-
-        boolean tempLow = currentTemp <= THRESHOLD_LOW;
-        boolean tempHigh = currentTemp >= THRESHOLD_HIGH;        
+        boolean tempLowCooling = currentTemp <= THRESHOLD_LOW && isCooling;      
 
         if (isDesiredRange) 
         {
@@ -61,12 +58,12 @@ reactiveclass Controller(5) {
                 isHeating = false;
             } 
         } 
-        else if (tempLow) 
+        else if (currentTemp <= THRESHOLD_LOW) 
         {
             hc_unit.setHeating();
             isHeating = true;
         } 
-        else if (tempHigh) 
+        else if (currentTemp >= THRESHOLD_HIGH) 
         {
             hc_unit.setCooling();
             isCooling = true;
