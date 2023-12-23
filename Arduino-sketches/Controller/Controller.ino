@@ -1,6 +1,8 @@
 #include "controller.hpp"
 
 boolean hacked_prev = false;
+boolean isHeating = false;
+boolean isCooling = false;
 
 void setup() {
     Serial.begin(BAUD);
@@ -28,14 +30,60 @@ void loop() {
 
 // If attack is set then scramble output
 void setOutput() {
-    if (current_temp == DESIRED_TEMP)
-        switchOffUnit();
+    boolean isDesiredRange = current_temp >= THRESHOLD_LOW && current_temp <= THRESHOLD_HIGH;
+    boolean tempHighHeating = current_temp >= THRESHOLD_HIGH && isHeating;
+    boolean tempLowCooling = current_temp <= THRESHOLD_LOW && isCooling;
 
-    if (current_temp < DESIRED_TEMP)
+    boolean tempLow = current_temp <= THRESHOLD_LOW;
+    boolean tempHigh = current_temp >= THRESHOLD_HIGH;        
+
+    if (isDesiredRange) 
+    {
+        if (tempHighHeating || tempLowCooling) {
+            switchOffUnit();
+            isCooling = false;
+            isHeating = false;
+        } 
+    } 
+    else if (tempLow) 
+    {
         setHeating();
-
-    if (current_temp > DESIRED_TEMP)
+        isHeating = true;
+    } 
+    else if (tempHigh) 
+    {
         setCooling();
+        isCooling = true;
+    } 
+    
+
+
+    // if (isDesiredRange && )
+    // {
+    //     switchOffUnit();
+    //     isCooling = false;
+    //     isHeating = false;
+    // } 
+    // else if (current_temp < DESIRED_TEMP)
+    // {
+    //     setHeating();
+    //     isHeating = true;
+    // } 
+    // else if (current_temp > DESIRED_TEMP)
+    // {
+    //     setCooling();
+    //     isCooling = true;
+    // }
+
+
+    // if (current_temp == DESIRED_TEMP)
+    //     switchOffUnit();
+
+    // if (current_temp < DESIRED_TEMP)
+    //     setHeating();
+
+    // if (current_temp > DESIRED_TEMP)
+    //     setCooling();
 }
 
 int getTemperature() {

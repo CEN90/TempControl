@@ -2,10 +2,10 @@
 env int desiredTemp_const = 25;
 
 // thresholds for heating
-env int thresh_heat = 24;
+env int THRESHOLD_LOW = 24;
 
 // thresholds for cooling
-env int thresh_cool = 26;
+env int THRESHOLD_HIGH = 26;
 
 // Hard boundaries
 env int MAX_TEMP = 30;
@@ -29,7 +29,8 @@ reactiveclass Controller(5) {
     Controller() {
         isCooling = false;
         isHeating = false;
-        currentTemp = 0; // Start off with desired
+
+        currentTemp = 0; 
         // currentTemp = desiredTemp_const; // Start off with desired
     }
 
@@ -45,27 +46,31 @@ reactiveclass Controller(5) {
     }
 
     msgsrv updateOutput() {
-        if (currentTemp == desiredTemp_const) {
-            if (isCooling || isHeating) {
+        boolean isDesiredRange = currentTemp >= THRESHOLD_LOW && currentTemp <= THRESHOLD_HIGH;
+        boolean tempHighHeating = currentTemp >= THRESHOLD_HIGH && isHeating;
+        boolean tempLowCooling = currentTemp <= THRESHOLD_LOW && isCooling;
+
+        boolean tempLow = currentTemp <= THRESHOLD_LOW;
+        boolean tempHigh = currentTemp >= THRESHOLD_HIGH;        
+
+        if (isDesiredRange) 
+        {
+            if (tempHighHeating || tempLowCooling) {
                 hc_unit.switchoff();
                 isCooling = false;
                 isHeating = false;
-            }
-        }
-        else if (currentTemp < desiredTemp_const) {
-            if (!isHeating) {
-                hc_unit.setHeating();
-                isHeating = true;
-                isCooling = false;
-            }
-        }
-        else if (currentTemp > desiredTemp_const) {
-            if (!isCooling) {
-                hc_unit.setCooling();
-                isCooling = true;
-                isHeating = false;
-            }
-        }
+            } 
+        } 
+        else if (tempLow) 
+        {
+            hc_unit.setHeating();
+            isHeating = true;
+        } 
+        else if (tempHigh) 
+        {
+            hc_unit.setCooling();
+            isCooling = true;
+        } 
     }
 }
 
@@ -104,7 +109,7 @@ reactiveclass Room(5) {
      }
 
     Room() {
-        currentTemp = desiredTemp_const;
+        currentTemp = 0;
         currentRegulation = 0;
         outside_air = 0;
         self.start();

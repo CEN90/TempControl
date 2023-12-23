@@ -47,15 +47,15 @@ struct input_t {
 state_input_t expected_inputs[4] = {
     { controller_updatetemp, 3, { 0, 1, 2 } },
     { hc_unit_setheating, 1, { 1 } },
-    { hc_unit_setcooling, 1, { 2 }},
     { hc_unit_switchoff, 1, { 0 } },
+    { hc_unit_setcooling, 1, { 2 }},
 };
 
 String output_strings[4] = {
     "Read temperature",
     "Turned on heating",
-    "Turned on cooling",
     "Turned off hc-unit",
+    "Turned on cooling",
 };
 
 void setPins() {

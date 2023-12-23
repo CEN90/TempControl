@@ -1,11 +1,12 @@
 #include <TMP36.h>
 #include <Wire.h>
 
-#define RESOLUTION 100
-#define TEMP_MAIN  PIN_A0
-#define TEMP_AUX   PIN_A2
+#define RESOLUTION   100
+#define RESOLUTION_F 100.0
+#define TEMP_MAIN    PIN_A0
+#define TEMP_AUX     PIN_A2
 
-#define VOLT       5.0
+#define VOLT         5.0
 
 struct temp_t {
   byte main;
@@ -31,34 +32,53 @@ void loop() {
 }
 
 void readTemp(){
-    float read_main = 0.0;
-    float read_aux = 0.0;
+    int smooth_main = 0;
+    int smooth_aux = 0;
 
     for (int i = 0; i < RESOLUTION; i++) {
-        read_main += temp_main.getTempC();
-        read_aux += temp_aux.getTempC();
-        delay(10);
+      smooth_main += round(temp_main.getTempC());
+      smooth_aux += round(temp_aux.getTempC());
+      delay(10);
     }
 
-    float t = (int) round(read_main / 100.0);
-
-    if (t == temp.main) {
-        changed = false;
-    } else {
-        changed = true;
-    }
-    
-    temp.main = t;
-    temp.aux = (int) round(read_aux / 100.0);
+    temp.main = smooth_main / RESOLUTION;
+    temp.main = smooth_aux / RESOLUTION;
 }
+
+// void readTemp(){
+//     float read_main = 0.0;
+//     float read_aux = 0.0;
+
+//     for (int i = 0; i < RESOLUTION; i++) {
+//         read_main += temp_main.getTempC();
+//         read_aux += temp_aux.getTempC();
+//         delay(10);
+//     }
+
+//     // float t = (int) read_main / 100.0;
+//     float t = (int) round(read_main / RESOLUTION_F);
+
+//     if (t == temp.main) {
+//         changed = false;
+//     } else {
+//         changed = true;
+//     }
+    
+//     temp.main = t;
+//     // temp.aux = (int) read_aux / 100.0;
+//     temp.aux = (int) round(read_aux / RESOLUTION_F);
+// }
 
 void onRequestTemp() {
     Wire.write((byte*)&temp, 2);
 
-    if (changed) {
-        Serial.print("Main: ");
-        Serial.print(temp.main);
-        Serial.print(" aux: ");
-        Serial.println(temp.aux);
-    }
+    Serial.println(temp.main);
+
+
+    // if (changed) {
+        // Serial.print("Main: ");
+        // Serial.print(temp.main);
+        // Serial.print(" aux: ");
+        // Serial.println(temp.aux);
+    // }
 }

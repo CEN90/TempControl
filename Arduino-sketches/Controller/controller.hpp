@@ -22,7 +22,11 @@
 
 // Temp definitions
 #define SHUTOFF_TEMP     35
+
+#define THRESHOLD_LOW    24
 #define DESIRED_TEMP     25
+#define THRESHOLD_HIGH   26
+
 int current_temp;
 
 enum attacks_t {
