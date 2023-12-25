@@ -41,12 +41,14 @@ void printPossibleChoices(int current, int start, int len) {
         int v = transitions[start + i][Value];
 
         Serial << labels_string[s] << " ";
-        
-        if (v != ERROR_STATE)
+
+        if (v != ERROR_STATE) {
             Serial << v;
+        }
         
-        if (i < len -1)
+        if (i < len -1) {
             Serial << ", ";
+        }
     }
     
     Serial.println("");
