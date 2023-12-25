@@ -130,7 +130,10 @@ reactiveclass Room(5) {
     }
 
     msgsrv setRegulation(int value) {
-        // currentRegulation = value * ?(1,2);
+        if(currentTemp > 23 && currentTemp < 27){
+            value *= ?(0, 1);
+        }
+
         currentRegulation = value;
     }
 
@@ -138,42 +141,6 @@ reactiveclass Room(5) {
         sensor.setCurrent(currentTemp);
     }
 }
-
-// reactiveclass Room(5) {
-//     knownrebecs { Sensor sensor; }
-
-//     statevars { 
-//         int currentTemp;
-//         int currentRegulation;
-//         int outside_air;
-//      }
-
-//     Room() {
-//         currentTemp = 0;
-//         currentRegulation = 0;
-//         outside_air = 0;
-//         self.start();
-//     }
-
-//     msgsrv start() {
-//         currentTemp = ?(21, 22, 23, 24, 25);
-//         self.updateStatus();
-//     }
-
-//     msgsrv updateStatus() {
-//         outside_air = ?(1, 0, -1);
-//         currentTemp = currentTemp - outside_air + currentRegulation;
-//         self.updateStatus() after(ROOM_DELAY);
-//     }
-
-//     msgsrv setRegulation(int value) {
-//         currentRegulation = value;
-//     }
-
-//     msgsrv getTemp() {
-//         sensor.setCurrent(currentTemp);
-//     }
-// }
 
 reactiveclass HC_Unit(5) {
     knownrebecs { Room room; }
