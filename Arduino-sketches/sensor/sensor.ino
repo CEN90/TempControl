@@ -42,7 +42,7 @@ void readTemp(){
     }
 
     temp.main = smooth_main / RESOLUTION;
-    temp.main = smooth_aux / RESOLUTION;
+    temp.aux = smooth_aux / RESOLUTION;
 }
 
 // void readTemp(){
@@ -72,7 +72,9 @@ void readTemp(){
 void onRequestTemp() {
     Wire.write((byte*)&temp, 2);
 
-    Serial.println(temp.main);
+    Serial.print(temp.main);
+    Serial.print(", ");
+    Serial.println(temp.aux);
 
 
     // if (changed) {

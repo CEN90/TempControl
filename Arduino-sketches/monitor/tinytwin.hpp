@@ -1,23 +1,22 @@
 #include "states.hpp"
 #include <Wire.h>
 
-constexpr int SENSOR = 2;
-constexpr int SENSOR_DATA_SIZE = 2;
+#define SENSOR       2
+#define SENSOR_DATA_SIZE  2
 
 // Input Arduino Uno
-// constexpr int TEMP_MAIN = PIN_A0;
-// constexpr int TEMP_AUX = PIN_A1;
-// constexpr int HEATING = PIN3;
-// constexpr int COOLING = PIN2;
+// #define HEATING = PIN3;
+// #define COOLING = PIN2;
 
 // Input Arduino Mega pinout
-// constexpr int TEMP_MAIN = PIN4;
-// constexpr int TEMP_AUX = PIN4;
-constexpr int COOLING = 13;
-constexpr int HEATING = 12;
+// #define TEMP_MAIN = PIN4;
+// #define TEMP_AUX = PIN4;
 
-constexpr int input_pins_len = 2;
-constexpr int input_pins[input_pins_len] = { HEATING, COOLING };
+#define COOLING    13
+#define HEATING    12
+#define INPUT_LEN  2
+
+constexpr int input_pins[INPUT_LEN] = { HEATING, COOLING };
 
 int temp_main = 0;
 int temp_aux = 0;
@@ -25,7 +24,7 @@ int temp_aux = 0;
 struct state_input_t {
     int state;
     int inputs_len;
-    int valid_inputs[input_pins_len + 2];
+    int valid_inputs[INPUT_LEN + 2];
 };
 
 struct input_t {
@@ -47,23 +46,23 @@ struct input_t {
 state_input_t expected_inputs[4] = {
     { controller_updatetemp, 3, { 0, 1, 2 } },
     { hc_unit_setheating, 1, { 1 } },
-    { hc_unit_switchoff, 1, { 0 } },
     { hc_unit_setcooling, 1, { 2 }},
+    { hc_unit_switchoff, 1, { 0 } },
 };
 
 String output_strings[4] = {
     "Read temperature",
     "Turned on heating",
-    "Turned off hc-unit",
     "Turned on cooling",
+    "Turned off hc-unit",
 };
 
 void setPins() {
-    for (size_t i = 0; i < input_pins_len; i++) {
+    for (size_t i = 0; i < INPUT_LEN; i++) {
         pinMode(input_pins[i], INPUT);
     }
 
-    delay(2000);
+    delay(1000);
 
     Wire.begin();
 }
@@ -79,7 +78,7 @@ void readTemp(input_t *input) {
 
 void readInputs(input_t *prev) {
     int result = 0;
-    for (int i = 0; i < input_pins_len; i++) {
+    for (int i = 0; i < INPUT_LEN; i++) {
         result += !digitalRead(input_pins[i]) << i; // active low for relay
     }
 

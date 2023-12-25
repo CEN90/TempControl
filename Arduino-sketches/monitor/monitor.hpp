@@ -30,7 +30,7 @@ void printNextStateOutput(int transition, int state) {
 }
 
 void printPossibleChoices(int current, int start, int len) { 
-    Serial << "Current state:" << " " << current << ", possible labels -> ";   
+    Serial << "Current state:" << " " << current << ", available t -> ";   
 
     for (size_t i = 0; i < len; i++) {
         int s = transitions[start + i][Label];

@@ -1,6 +1,7 @@
 #include <Wire.h>
 
 #define POLL_TIME        1000
+#define RESET_TIME       2000
 #define BAUD             115200
 
 // Heating
@@ -91,6 +92,9 @@ void setPins() {
     pinMode(SWITCH_OFF_LED, OUTPUT);
 
     pinMode(ATTACK_BUTTON, INPUT_PULLUP);
+
+    // Wait for everything to stabilize
+    delay(RESET_TIME);
 }
 
 /*
