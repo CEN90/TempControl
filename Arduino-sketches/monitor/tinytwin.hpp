@@ -35,9 +35,9 @@ struct input_t {
     boolean unchanged;
 
     void print() {
-        Serial.print("Commands ");
-        Serial.println(commands);
-        Serial.print("Temp_main: ");
+        Serial.print("Command read: ");
+        Serial.print(commands);
+        Serial.print(", Temp_main: ");
         Serial.print(temp_main);
         Serial.print(" Temp_aux: ");
         Serial.println(temp_aux);

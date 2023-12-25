@@ -81,7 +81,6 @@ void firstRead(){
 // Match input with possible transitions in current state
 int compare(int start, int len) {
     printInput(input);
-    // printInput(read_inputs);
 
     // For every possible transition in state
     for (size_t i = 0; i < len; i++)
@@ -102,8 +101,7 @@ int compare(int start, int len) {
         }
 
         if (is_expected_input(input, expected_inputs[state_label], start + i)) {
-            printState(transition_to, state_label);
-            printStateOutput(state_label);
+            printNextStateOutput(transition_to, state_label);
             is_match = true;
         }
 

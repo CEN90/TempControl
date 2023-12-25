@@ -24,13 +24,9 @@ void printInput(input_t input) {
     input.print();
 }
 
-void printState(int transition, int state) {
-    Serial.print(transition);
-    Serial.print(" -> " + labels_string[state] + ": ");
-}
-
-void printStateOutput(int state) {
-    Serial.println(output_strings[state] + "\n");
+void printNextStateOutput(int transition, int state) {
+    Serial << "Next state: " << transition << " -> " << labels_string[state];
+    Serial << ": " << output_strings[state] << "\n\n";
 }
 
 void printPossibleChoices(int current, int start, int len) { 
