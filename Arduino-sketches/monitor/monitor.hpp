@@ -38,7 +38,15 @@ void printPossibleChoices(int current, int start, int len) {
 
     for (size_t i = 0; i < len; i++) {
         int s = transitions[start + i][Label];
+        int v = transitions[start + i][Value];
+
         Serial << labels_string[s] << " ";
+        
+        if (v != ERROR_STATE)
+            Serial << v;
+        
+        if (i < len -1)
+            Serial << ", ";
     }
     
     Serial.println("");
