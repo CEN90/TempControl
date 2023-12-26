@@ -2,7 +2,7 @@
 #define BAUD  115200
 
 
-/* Not used for now */
+/* Not used for this tiny twin */
 boolean timer_on = false;
 unsigned long timer = 0;
 
@@ -28,12 +28,10 @@ void setup() {
     next_state = start_state;
 
     Serial.println(F("Ready to start monitor now"));
-    // firstRead();
 }
 
 void loop() {   
     readInputs(&input);
-    // read_inputs = readInputs();
 
     // If timer is turned on and has run out, do something... later
     if (timer_on && timer < millis()) {
@@ -48,7 +46,7 @@ void loop() {
     
     // If error then just print out input for logging purposes
     if (next_state == ERROR_STATE) {
-        // follow();
+        follow();
         delay(POLL_TIME);
         prev_inputs = read_inputs;
         return;
@@ -72,12 +70,6 @@ void loop() {
     delay(POLL_TIME);
 }
 
-void firstRead(){
-    readInputs(&input);
-    Serial.print("Temp is ");
-    Serial.println(input.temp_main);
-}
-
 // Match input with possible transitions in current state
 int compare(int start, int len) {
     printInput(input);
@@ -89,23 +81,18 @@ int compare(int start, int len) {
         int transition_to = transitions[start + i][To];
         int inputs_len = expected_inputs[state_label].inputs_len;
         
-        // Compare the states possible inputs
-        boolean is_match = false; // If then skip for
 
+        // If no inputs given then tell main loop to do one more iteration
         if (inputs_len == 0) {
             tau = true;
-            // is_match = true;
             Serial.println(F("Encountered a tau transition"));
         } else {
             tau = false;
         }
 
+        // Compare the states possible inputs
         if (is_expected_input(input, expected_inputs[state_label], start + i)) {
             printNextStateOutput(transition_to, state_label);
-            is_match = true;
-        }
-
-        if (is_match) {
             return transition_to;
         }
     }

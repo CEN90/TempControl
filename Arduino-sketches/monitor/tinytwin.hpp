@@ -1,17 +1,11 @@
 #include "states.hpp"
 #include <Wire.h>
 
-#define SENSOR       2
+// I2C bus for temp
+#define SENSOR            2
 #define SENSOR_DATA_SIZE  2
 
-// Input Arduino Uno
-// #define HEATING = PIN3;
-// #define COOLING = PIN2;
-
-// Input Arduino Mega pinout
-// #define TEMP_MAIN = PIN4;
-// #define TEMP_AUX = PIN4;
-
+// Input pins
 #define COOLING    13
 #define HEATING    12
 #define INPUT_LEN  2
@@ -82,25 +76,25 @@ void readInputs(input_t *prev) {
         result += !digitalRead(input_pins[i]) << i; // active low for relay
     }
 
+    // Saving for comparison
     int prev_temp_main = prev->temp_main;
     int prev_temp_aux = prev->temp_aux;
 
-    // Lägg till temp-läsning här!
     readTemp(prev);
 
-    // if (prev->commands == result) {
+    // To break the main loop if input has not changed
     if (prev->commands == result && prev_temp_main == prev->temp_main) {
         prev->unchanged = true;
     } else {
         prev->commands = result;
         prev->unchanged = false;
     }
-    
 }
 
 boolean is_expected_input(input_t current, state_input_t state, int current_state) {
     boolean match = false;
     
+    // Some states can have multiple valid inputs
     for (size_t i = 0; i < state.inputs_len; i++) {
         if (current.commands == state.valid_inputs[i]) {
             match = true;
@@ -110,10 +104,10 @@ boolean is_expected_input(input_t current, state_input_t state, int current_stat
     transition_labels label = transitions[current_state][Label];
     int value = transitions[current_state][Value];
 
+    // If current temp is not expected temp
     if (label == controller_updatetemp && value != current.temp_main) {
         match = false;
     }
-    
 
     return match;
 }
