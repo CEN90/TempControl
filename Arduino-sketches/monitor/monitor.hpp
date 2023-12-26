@@ -2,7 +2,7 @@
 
 // Error output
 constexpr int ERROR_STATE = -1;
-constexpr int POLL_TIME = 10;
+constexpr int POLL_TIME = 1;
 
 
 template <typename T>
