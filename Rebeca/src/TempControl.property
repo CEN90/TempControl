@@ -2,17 +2,22 @@ property {
 	define {
 		isHeating = hc_unit.heaterOn;
 		isCooling = hc_unit.coolerOn;
+		
+		starting = controller.currentTemp == 0;
 
-        //temp_over = controller.currentTemp > thresh_heat + 1;
-        //temp_under = controller.currentTemp < thresh_cool - 1;
+        temp_over = controller.currentTemp > THRESHOLD_HIGH + 1;
+        temp_under = controller.currentTemp < THRESHOLD_LOW - 1;
         
         temp_under_limit = controller.currentTemp < MIN_TEMP;
         temp_over_limit = controller.currentTemp > MAX_TEMP;
 	}
 
     Assertion {
-      //  safety_prop1: !(temp_over_limit && !isCooling); // temp över och kyler
-       // safety_prop2: !(temp_under_limit && !isHeating); // temp under och värmer
-        safety_prop3: !(temp_under_limit && temp_over_limit);
+	    // temp over and cooling
+        safety_prop1: !(temp_over_limit && !isCooling && !starting); 
+        // temp under and heating
+        safety_prop2: !(temp_under_limit && !isHeating && !starting); 
+        // temp neither above or below limits
+        safety_prop3: !(temp_under_limit && temp_over_limit && !starting); 
     }
 }

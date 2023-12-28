@@ -31,7 +31,6 @@ reactiveclass Controller(5) {
         isHeating = false;
 
         currentTemp = 0; 
-        // currentTemp = desiredTemp_const; // Start off with desired
     }
 
     msgsrv setCurrent(int value) {
